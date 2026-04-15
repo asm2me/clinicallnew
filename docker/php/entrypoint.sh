@@ -61,6 +61,12 @@ if [ $RETRY -lt $MAX_RETRIES ]; then
     echo "  Running migrations..."
     php artisan migrate --force 2>&1 || echo "  (migrations may have already run)"
 
+    # Create optional tables used by cache/telescope if missing
+    if [ ! -f "database/migrations/2024_01_02_000001_create_tenant_tables.php" ]; then
+        php artisan cache:table --no-interaction >/dev/null 2>&1 || true
+        php artisan telescope:install --no-interaction >/dev/null 2>&1 || true
+    fi
+
     # Seed if plans table is empty
     PLAN_COUNT=$(php artisan tinker --execute="echo \App\Models\Plan::count();" 2>/dev/null || echo "0")
     if [ "$PLAN_COUNT" = "0" ]; then
