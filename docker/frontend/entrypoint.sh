@@ -7,7 +7,7 @@ echo "============================================="
 echo "  Clinic SaaS Platform - Frontend Container"
 echo "============================================="
 
-if [ ! -d "node_modules" ]; then
+if [ ! -d "node_modules" ] || [ ! -x "./node_modules/.bin/next" ]; then
     echo "[1/2] Installing npm dependencies..."
     npm install
 else
