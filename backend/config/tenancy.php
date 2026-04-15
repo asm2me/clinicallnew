@@ -55,7 +55,6 @@ return [
 
     'features' => [
         \Stancl\Tenancy\Features\UserImpersonation::class,
-        \Stancl\Tenancy\Features\TelescopeSupport::class,
         \Stancl\Tenancy\Features\UniversalRoutes::class,
     ],
 
