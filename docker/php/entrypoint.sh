@@ -39,7 +39,12 @@ else
     echo "[4/5] JWT_SECRET already set."
 fi
 
-# ── 5. Wait for PostgreSQL then run migrations ──────────────────────────────
+# ── 5. Ensure Laravel writable directories exist ────────────────────────────
+mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views
+chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
+chmod -R 775 storage bootstrap/cache 2>/dev/null || true
+
+# ── 6. Wait for PostgreSQL then run migrations ──────────────────────────────
 echo "[5/5] Waiting for PostgreSQL..."
 MAX_RETRIES=30
 RETRY=0
