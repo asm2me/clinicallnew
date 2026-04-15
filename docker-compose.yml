@@ -76,7 +76,8 @@ services:
       - frontend_node_modules:/app/node_modules  # Persist node_modules
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:8000/api
-      WATCHPACK_POLLING: "true"                  # Hot reload on Windows/WSL
+      HOSTNAME: 0.0.0.0
+      NEXT_TELEMETRY_DISABLED: "1"
     depends_on:
       - api
     networks:
