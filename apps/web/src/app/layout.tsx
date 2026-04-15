@@ -1,22 +1,20 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { SiteHeader } from '@/components/layout/site-header';
-import { SiteFooter } from '@/components/layout/site-footer';
-import { websiteSettings, seoKeywords } from '@/lib/site-data';
+import { Navbar } from '@/components/layout/navbar';
+import { Footer } from '@/components/layout/footer';
 
 export const metadata: Metadata = {
   title: {
-    default: websiteSettings.brandName,
-    template: `%s | ${websiteSettings.brandName}`
+    default: 'Clinicall',
+    template: '%s | Clinicall'
   },
-  description: websiteSettings.description,
-  keywords: seoKeywords,
+  description: 'Premium SaaS marketing website for clinic software, subscriptions, and patient growth.',
   metadataBase: new URL('https://clinicall.example'),
   openGraph: {
-    title: websiteSettings.brandName,
-    description: websiteSettings.description,
+    title: 'Clinicall',
+    description: 'Premium SaaS marketing website for clinic software, subscriptions, and patient growth.',
     url: 'https://clinicall.example',
-    siteName: websiteSettings.brandName,
+    siteName: 'Clinicall',
     type: 'website'
   }
 };
@@ -25,9 +23,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="bg-background text-foreground antialiased">
-        <SiteHeader />
+        <Navbar />
         <main>{children}</main>
-        <SiteFooter />
+        <Footer />
       </body>
     </html>
   );
