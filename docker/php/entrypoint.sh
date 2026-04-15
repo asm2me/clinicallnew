@@ -8,7 +8,7 @@ echo "  Clinic SaaS Platform - API Container"
 echo "============================================="
 
 # ── 1. Install PHP dependencies ──────────────────────────────────────────────
-if [ ! -d "vendor" ]; then
+if [ ! -d "vendor" ] || [ ! -f "vendor/autoload.php" ]; then
     echo "[1/5] Installing Composer dependencies..."
     composer install --no-interaction --optimize-autoloader
 else
