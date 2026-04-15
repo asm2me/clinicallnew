@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 import { DashboardShell } from '@/components/dashboard/shell';
+import { DemoBanner } from '@/components/dashboard/demo-banner';
+import { statusBadge } from '@/lib/status-badge';
 import { getDashboardDemoData } from '@/lib/demo-data';
 import { getDemoSession, type DemoRole } from '@/lib/demo-auth';
 
@@ -12,6 +14,12 @@ export const metadata: Metadata = {
 
 function getRoleLabel(role: DemoRole) {
   return role;
+}
+
+function trendClass(change: string) {
+  if (change.startsWith('+')) return 'text-emerald-600 dark:text-emerald-400';
+  if (change.startsWith('-')) return 'text-red-500 dark:text-red-400';
+  return 'text-muted-foreground';
 }
 
 export default function DashboardPage({
@@ -35,16 +43,14 @@ export default function DashboardPage({
       description="A production-style demo workspace with role-aware insights, notifications, and quick actions."
       role={role}
     >
-      <div className="mb-6 rounded-3xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-200">
-        Demo auth enabled. This dashboard uses deterministic sample data for the {getRoleLabel(role)} experience.
-      </div>
+      <DemoBanner message={`Demo auth enabled. This dashboard uses deterministic sample data for the ${getRoleLabel(role)} experience.`} />
 
       <div className="grid gap-6 lg:grid-cols-4">
         {data.kpis.map((item) => (
           <article key={item.label} className="odoo-kpi p-5">
             <p className="text-sm font-medium text-muted-foreground">{item.label}</p>
             <p className="mt-3 text-3xl font-bold text-foreground">{item.value}</p>
-            <p className="mt-2 text-sm text-muted-foreground">{item.change}</p>
+            <p className={`mt-2 text-xs font-medium ${trendClass(item.change)}`}>{item.change}</p>
           </article>
         ))}
       </div>
@@ -61,12 +67,12 @@ export default function DashboardPage({
 
           <div className="mt-6 space-y-4">
             {data.activities.map((item) => (
-              <div key={item.title} className="flex items-start justify-between gap-4 rounded-2xl border border-border bg-background px-4 py-3">
+              <div key={item.title} className="flex items-start justify-between gap-4 rounded-2xl border border-border bg-background px-4 py-3 transition-colors hover:bg-muted/40">
                 <div>
                   <p className="font-medium text-foreground">{item.title}</p>
                   <p className="mt-1 text-sm text-muted-foreground">{item.description}</p>
                 </div>
-                <span className="rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-secondary-foreground">{item.status}</span>
+                <span className={statusBadge(item.status)}>{item.status}</span>
               </div>
             ))}
           </div>

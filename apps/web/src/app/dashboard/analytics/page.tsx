@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 import { DashboardShell } from '@/components/dashboard/shell';
+import { DemoBanner } from '@/components/dashboard/demo-banner';
 import { getAnalyticsDemoData } from '@/lib/demo-data';
 import { getDemoSession, type DemoRole } from '@/lib/demo-auth';
 
@@ -31,9 +32,7 @@ export default function AnalyticsPage({
       description="A role-aware demo of operational trends, performance metrics, and conversion health."
       role={role}
     >
-      <div className="mb-6 rounded-3xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-200">
-        Demo auth enabled. Analytics values are illustrative and deterministic.
-      </div>
+      <DemoBanner message="Demo auth enabled. Analytics values are illustrative and deterministic." />
 
       <div className="grid gap-6 lg:grid-cols-4">
         {data.kpis.map((item) => (
@@ -62,11 +61,16 @@ export default function AnalyticsPage({
         <section className="odoo-panel p-6">
           <h2 className="text-xl font-semibold text-foreground">Trends</h2>
           <div className="mt-6 space-y-4">
-            {data.trends.map((item) => (
-              <div key={item.label} className="rounded-2xl border border-border bg-background p-4">
-                <p className="text-sm font-medium text-muted-foreground">{item.label}</p>
-                <p className="mt-2 text-lg font-semibold text-foreground">{item.value}</p>
-                <p className="mt-1 text-sm text-muted-foreground">{item.note}</p>
+            {data.trends.map((item, index) => (
+              <div key={item.label} className="flex items-start gap-4 rounded-xl border border-border bg-background p-4">
+                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground">
+                  {index + 1}
+                </span>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">{item.label}</p>
+                  <p className="mt-1 text-base font-semibold text-foreground">{item.value}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{item.note}</p>
+                </div>
               </div>
             ))}
           </div>

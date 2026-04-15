@@ -278,6 +278,139 @@ select:focus-visible {
   .animate-slide-up {
     animation: slideUp 0.5s ease-out;
   }
+
+  /* ────────────────────────────────────────────────────────────
+     Dashboard / ERP Component System (Odoo-inspired)
+     ──────────────────────────────────────────────────────────── */
+
+  .odoo-shell {
+    background-color: hsl(var(--muted));
+    min-height: 100vh;
+  }
+
+  .odoo-card {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .odoo-panel {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius-lg);
+  }
+
+  .odoo-kpi {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-left: 3px solid hsl(var(--primary));
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+
+  .odoo-kpi:hover {
+    box-shadow: var(--shadow-medium);
+    transform: translateY(-2px);
+  }
+
+  .odoo-badge {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold;
+    background: hsl(var(--primary) / 0.1);
+    color: hsl(var(--primary));
+    border: 1px solid hsl(var(--primary) / 0.25);
+    border-radius: 9999px;
+    white-space: nowrap;
+  }
+
+  .odoo-button-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium;
+    background: transparent;
+    color: hsl(var(--muted-foreground));
+    border: 1px solid hsl(var(--border));
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .odoo-button-secondary:hover {
+    background: hsl(var(--muted));
+    color: hsl(var(--foreground));
+    border-color: hsl(var(--foreground) / 0.2);
+  }
+
+  /* Status Badge Variants */
+  .status-confirmed {
+    background: hsl(var(--success) / 0.12);
+    color: hsl(var(--success));
+    border: 1px solid hsl(var(--success) / 0.3);
+  }
+
+  .status-completed {
+    background: hsl(215 20% 65% / 0.15);
+    color: hsl(215 16% 47%);
+    border: 1px solid hsl(215 16% 47% / 0.25);
+  }
+
+  .status-pending {
+    background: hsl(var(--warning) / 0.12);
+    color: hsl(var(--warning));
+    border: 1px solid hsl(var(--warning) / 0.3);
+  }
+
+  .status-cancelled {
+    background: hsl(var(--danger) / 0.1);
+    color: hsl(var(--danger));
+    border: 1px solid hsl(var(--danger) / 0.25);
+  }
+
+  .status-urgent {
+    background: hsl(var(--danger) / 0.12);
+    color: hsl(var(--danger));
+    border: 1px solid hsl(var(--danger) / 0.3);
+    font-weight: 700;
+  }
+
+  .status-stable {
+    background: hsl(var(--success) / 0.1);
+    color: hsl(var(--success));
+    border: 1px solid hsl(var(--success) / 0.25);
+  }
+
+  .status-needs-followup {
+    background: hsl(var(--warning) / 0.12);
+    color: hsl(38 80% 35%);
+    border: 1px solid hsl(var(--warning) / 0.3);
+  }
+
+  .status-under-review {
+    background: hsl(var(--secondary) / 0.1);
+    color: hsl(var(--secondary));
+    border: 1px solid hsl(var(--secondary) / 0.25);
+  }
+
+  .status-operational {
+    background: hsl(var(--success) / 0.1);
+    color: hsl(var(--success));
+    border: 1px solid hsl(var(--success) / 0.25);
+  }
+
+  .status-launching {
+    background: hsl(199 89% 48% / 0.12);
+    color: hsl(199 89% 38%);
+    border: 1px solid hsl(199 89% 48% / 0.3);
+  }
+
+  .status-available {
+    background: hsl(var(--success) / 0.1);
+    color: hsl(var(--success));
+    border: 1px solid hsl(var(--success) / 0.25);
+  }
+
+  .status-default {
+    background: hsl(var(--muted));
+    color: hsl(var(--muted-foreground));
+    border: 1px solid hsl(var(--border));
+  }
 }
 
 @keyframes fadeIn {

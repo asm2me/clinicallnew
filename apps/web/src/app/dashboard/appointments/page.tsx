@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 import { DashboardShell } from '@/components/dashboard/shell';
+import { DemoBanner } from '@/components/dashboard/demo-banner';
+import { statusBadge } from '@/lib/status-badge';
 import { getAppointmentsDemoData } from '@/lib/demo-data';
 import { getDemoSession, type DemoRole } from '@/lib/demo-auth';
 
@@ -31,9 +33,7 @@ export default function AppointmentsPage({
       description="Track schedules, appointment status, and daily flow from a clean operations view."
       role={role}
     >
-      <div className="mb-6 rounded-3xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-200">
-        Demo auth enabled. Appointment data shown here is deterministic sample content.
-      </div>
+      <DemoBanner message="Demo auth enabled. Appointment data shown here is deterministic sample content." />
 
       <div className="grid gap-6 lg:grid-cols-3">
         {data.summary.map((item) => (
@@ -63,15 +63,13 @@ export default function AppointmentsPage({
             </thead>
             <tbody className="divide-y divide-border bg-card">
               {data.appointments.map((item) => (
-                <tr key={`${item.time}-${item.patient}`}>
+                <tr key={`${item.time}-${item.patient}`} className="transition-colors hover:bg-muted/40">
                   <td className="px-6 py-4 font-medium text-foreground">{item.time}</td>
                   <td className="px-6 py-4 text-foreground">{item.patient}</td>
                   <td className="px-6 py-4 text-muted-foreground">{item.clinic}</td>
                   <td className="px-6 py-4 text-muted-foreground">{item.doctor}</td>
                   <td className="px-6 py-4">
-                    <span className="rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-secondary-foreground">
-                      {item.status}
-                    </span>
+                    <span className={statusBadge(item.status)}>{item.status}</span>
                   </td>
                 </tr>
               ))}

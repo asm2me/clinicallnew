@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { DashboardNav } from '@/components/dashboard/nav';
-import type { DemoRole } from '@/lib/demo-auth';
+import { DEMO_ROLES, type DemoRole } from '@/lib/demo-auth';
 
 type DashboardShellProps = {
   title?: string;
@@ -9,12 +9,18 @@ type DashboardShellProps = {
   children: React.ReactNode;
 };
 
-const roleTone: Record<DemoRole, string> = {
-  'Super Admin': 'bg-primary/10 text-primary',
-  'Tenant Admin': 'bg-secondary text-secondary-foreground',
-  Doctor: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300',
-  Staff: 'bg-amber-500/15 text-amber-700 dark:text-amber-300',
-  Patient: 'bg-sky-500/15 text-sky-700 dark:text-sky-300'
+type RoleToneConfig = {
+  bg: string;
+  text: string;
+  dot: string;
+};
+
+const roleTone: Record<DemoRole, RoleToneConfig> = {
+  'Super Admin': { bg: 'bg-primary/10', text: 'text-primary', dot: 'bg-primary' },
+  'Tenant Admin': { bg: 'bg-secondary/10', text: 'text-secondary', dot: 'bg-secondary' },
+  Doctor: { bg: 'bg-emerald-500/10', text: 'text-emerald-700 dark:text-emerald-300', dot: 'bg-emerald-500' },
+  Staff: { bg: 'bg-amber-500/10', text: 'text-amber-700 dark:text-amber-300', dot: 'bg-amber-500' },
+  Patient: { bg: 'bg-sky-500/10', text: 'text-sky-700 dark:text-sky-300', dot: 'bg-sky-500' }
 };
 
 export function DashboardShell({ title, description, role, children }: DashboardShellProps) {
@@ -34,16 +40,37 @@ export function DashboardShell({ title, description, role, children }: Dashboard
 
             <div className="mt-5">
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">Workspace role</p>
-              <div className={`mt-3 inline-flex rounded-full px-3 py-1.5 text-sm font-semibold ${roleTone[role]}`}>{role}</div>
+              <div className={`mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold ${roleTone[role].bg} ${roleTone[role].text}`}>
+                <span className={`h-2 w-2 rounded-full ${roleTone[role].dot}`} aria-hidden="true" />
+                {role}
+              </div>
             </div>
 
+            <details className="mt-3 group">
+              <summary className="cursor-pointer list-none text-xs font-medium text-muted-foreground hover:text-foreground transition-colors select-none">
+                <span className="group-open:hidden">Switch role ▾</span>
+                <span className="hidden group-open:inline">Switch role ▴</span>
+              </summary>
+              <div className="mt-2 space-y-0.5 pl-1">
+                {DEMO_ROLES.filter((r) => r !== role).map((r) => (
+                  <Link
+                    key={r}
+                    href={`/dashboard?role=${encodeURIComponent(r)}`}
+                    className="block rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                  >
+                    {r}
+                  </Link>
+                ))}
+              </div>
+            </details>
+
             <div className="mt-6">
-              <DashboardNav />
+              <DashboardNav role={role} />
             </div>
 
             <div className="mt-6 border-t border-border pt-5">
-              <Link href="/login" className="odoo-button-secondary w-full">
-                Log out
+              <Link href="/login" className="odoo-button-secondary w-full justify-center">
+                ← Exit demo
               </Link>
             </div>
           </div>

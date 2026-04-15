@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 import { DashboardShell } from '@/components/dashboard/shell';
+import { DemoBanner } from '@/components/dashboard/demo-banner';
+import { statusBadge } from '@/lib/status-badge';
 import { getDemoSession, type DemoRole } from '@/lib/demo-auth';
 import { getSettingsDemoData } from '@/lib/demo-data';
 
@@ -31,9 +33,7 @@ export default function SettingsPage({
       description="Configure account preferences, notification settings, and role-specific controls."
       role={role}
     >
-      <div className="mb-6 rounded-3xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-200">
-        Demo auth enabled. Settings are editable-looking UI only and do not persist.
-      </div>
+      <DemoBanner message="Demo auth enabled. Settings are editable-looking UI only and do not persist." />
 
       <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
         <section className="odoo-panel p-6">
@@ -53,12 +53,12 @@ export default function SettingsPage({
           <h2 className="text-xl font-semibold text-foreground">Preferences</h2>
           <div className="mt-6 space-y-4">
             {data.preferences.map((item) => (
-              <div key={item.label} className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-background px-4 py-4">
+              <div key={item.label} className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-background px-4 py-4 transition-colors hover:bg-muted/40">
                 <div>
                   <p className="font-medium text-foreground">{item.label}</p>
                   <p className="mt-1 text-sm text-muted-foreground">{item.note}</p>
                 </div>
-                <span className="rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-secondary-foreground">
+                <span className={statusBadge(item.value)}>
                   {item.value}
                 </span>
               </div>

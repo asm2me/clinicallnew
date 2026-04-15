@@ -1,31 +1,64 @@
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import type { DemoRole } from '@/lib/demo-auth';
 
-type DashboardNavItem = {
-  href: string;
-  label: string;
-};
+type NavItem = { href: string; label: string; icon: string };
 
-const navItems: DashboardNavItem[] = [
-  { href: '/dashboard', label: 'Overview' },
-  { href: '/dashboard/appointments', label: 'Appointments' },
-  { href: '/dashboard/patients', label: 'Patients' },
-  { href: '/dashboard/clinics', label: 'Clinics' },
-  { href: '/dashboard/analytics', label: 'Analytics' },
-  { href: '/dashboard/settings', label: 'Settings' },
+const navItems: NavItem[] = [
+  { href: '/dashboard', label: 'Overview', icon: '▤' },
+  { href: '/dashboard/appointments', label: 'Appointments', icon: '📅' },
+  { href: '/dashboard/patients', label: 'Patients', icon: '👤' },
+  { href: '/dashboard/clinics', label: 'Clinics', icon: '🏥' },
+  { href: '/dashboard/analytics', label: 'Analytics', icon: '📊' },
+  { href: '/dashboard/settings', label: 'Settings', icon: '⚙️' },
 ];
 
-export function DashboardNav() {
+type DashboardNavProps = { role: DemoRole };
+
+export function DashboardNav({ role }: DashboardNavProps) {
+  const pathname = usePathname();
+
   return (
-    <nav aria-label="Dashboard navigation" className="space-y-1">
-      {navItems.map((item) => (
-        <Link
-          key={item.href}
-          href={item.href}
-          className="flex items-center rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
-        >
-          {item.label}
-        </Link>
-      ))}
+    <nav aria-label="Dashboard navigation" className="space-y-0.5">
+      {navItems.map((item) => {
+        // Exact match for root /dashboard, prefix match for sub-routes
+        const isActive =
+          item.href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(item.href);
+
+        const href = `${item.href}?role=${encodeURIComponent(role)}`;
+
+        return (
+          <Link
+            key={item.href}
+            href={href}
+            aria-current={isActive ? 'page' : undefined}
+            className={[
+              'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150',
+              isActive
+                ? 'bg-primary/10 text-primary'
+                : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+            ].join(' ')}
+          >
+            <span
+              className={[
+                'flex h-6 w-6 items-center justify-center rounded-md text-xs transition-colors',
+                isActive
+                  ? 'bg-primary/15 text-primary'
+                  : 'bg-transparent text-muted-foreground group-hover:text-foreground',
+              ].join(' ')}
+              aria-hidden="true"
+            >
+              {item.icon}
+            </span>
+            {item.label}
+            {isActive && (
+              <span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary" aria-hidden="true" />
+            )}
+          </Link>
+        );
+      })}
     </nav>
   );
 }
