@@ -31,6 +31,7 @@ services:
       DB_PASSWORD: secret
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      CACHE_STORE: redis
       CACHE_DRIVER: redis
       QUEUE_CONNECTION: redis
       SESSION_DRIVER: redis
@@ -135,6 +136,8 @@ services:
       - api_vendor:/var/www/html/vendor
     environment:
       APP_ENV: local
+      CACHE_STORE: redis
+      CACHE_DRIVER: redis
       DB_CONNECTION: pgsql
       DB_HOST: postgres
       DB_PORT: 5432
@@ -162,6 +165,8 @@ services:
       - api_vendor:/var/www/html/vendor
     environment:
       APP_ENV: local
+      CACHE_STORE: redis
+      CACHE_DRIVER: redis
       DB_CONNECTION: pgsql
       DB_HOST: postgres
       DB_DATABASE: clinic_central
