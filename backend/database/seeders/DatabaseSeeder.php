@@ -2,16 +2,17 @@
 
 namespace Database\Seeders;
 
-use App\Models\Plan;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->call([
-            PlanSeeder::class,
-            SuperAdminSeeder::class,
-        ]);
+        DB::transaction(function () {
+            $this->call([
+                PlanSeeder::class,
+            ]);
+        });
     }
 }
