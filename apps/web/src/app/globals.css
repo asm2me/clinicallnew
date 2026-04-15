@@ -60,6 +60,60 @@
     radial-gradient(circle at bottom right, rgba(99, 102, 241, 0.15), transparent 40%);
 }
 
+.ocean {
+  --background: 210 100% 97%;
+  --foreground: 217 33% 17%;
+  --card: 0 0% 100%;
+  --card-foreground: 217 33% 17%;
+  --border: 214 32% 91%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
+  --primary: 199 89% 48%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 265 70% 65%;
+  --secondary-foreground: 0 0% 100%;
+  --accent: 24 95% 53%;
+  --accent-foreground: 0 0% 100%;
+  --success: 158 64% 42%;
+  --warning: 38 92% 50%;
+  --danger: 0 84% 60%;
+  --ring: 199 89% 48%;
+  --shadow-soft: 0 4px 20px -2px rgba(14, 165, 233, 0.15);
+  --shadow-medium: 0 10px 40px -10px rgba(14, 165, 233, 0.2);
+  --shadow-strong: 0 20px 60px -15px rgba(14, 165, 233, 0.25);
+  --gradient-hero: linear-gradient(135deg, #082f49 0%, #0284c7 50%, #0ea5e9 100%);
+  --gradient-surface: linear-gradient(180deg, rgba(240, 249, 255, 0.98), rgba(224, 242, 254, 0.95));
+  --gradient-soft: radial-gradient(circle at top left, rgba(14, 165, 233, 0.12), transparent 40%),
+    radial-gradient(circle at bottom right, rgba(168, 85, 247, 0.12), transparent 40%);
+}
+
+.dark.ocean {
+  --background: 217 33% 5%;
+  --foreground: 210 40% 98%;
+  --card: 217 33% 13%;
+  --card-foreground: 210 40% 98%;
+  --border: 215 25% 23%;
+  --muted: 215 25% 12%;
+  --muted-foreground: 215 20% 65%;
+  --primary: 199 89% 45%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 265 70% 60%;
+  --secondary-foreground: 0 0% 100%;
+  --accent: 24 95% 58%;
+  --accent-foreground: 0 0% 100%;
+  --success: 158 64% 50%;
+  --warning: 38 92% 55%;
+  --danger: 0 84% 65%;
+  --ring: 199 89% 45%;
+  --shadow-soft: 0 4px 20px -2px rgba(14, 165, 233, 0.2);
+  --shadow-medium: 0 10px 40px -10px rgba(14, 165, 233, 0.25);
+  --shadow-strong: 0 20px 60px -15px rgba(14, 165, 233, 0.3);
+  --gradient-hero: linear-gradient(135deg, #0c4a6e 0%, #0369a1 50%, #0284c7 100%);
+  --gradient-surface: linear-gradient(180deg, rgba(8, 47, 73, 0.92), rgba(12, 74, 110, 0.95));
+  --gradient-soft: radial-gradient(circle at top left, rgba(14, 165, 233, 0.15), transparent 40%),
+    radial-gradient(circle at bottom right, rgba(168, 85, 247, 0.15), transparent 40%);
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -145,6 +199,14 @@ select:focus-visible {
   .btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px -2px rgba(16, 185, 129, 0.5);
+  }
+
+  .ocean .btn-primary {
+    box-shadow: 0 4px 14px -2px rgba(14, 165, 233, 0.4);
+  }
+
+  .ocean .btn-primary:hover {
+    box-shadow: 0 6px 20px -2px rgba(14, 165, 233, 0.5);
   }
 
   .btn-secondary {
