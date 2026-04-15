@@ -15,7 +15,12 @@ else
     echo "[1/5] Composer dependencies already installed."
 fi
 
-# ── 2. Create .env if missing ────────────────────────────────────────────────
+# ── 2. Ensure Laravel writable directories exist ────────────────────────────
+mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views
+chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
+chmod -R 775 storage bootstrap/cache 2>/dev/null || true
+
+# ── 3. Create .env if missing ────────────────────────────────────────────────
 if [ ! -f ".env" ]; then
     echo "[2/5] Creating .env from .env.example..."
     cp .env.example .env
@@ -23,7 +28,7 @@ else
     echo "[2/5] .env already exists."
 fi
 
-# ── 3. Generate APP_KEY if not set ───────────────────────────────────────────
+# ── 4. Generate APP_KEY if not set ───────────────────────────────────────────
 if grep -q "^APP_KEY=$" .env 2>/dev/null; then
     echo "[3/5] Generating application key..."
     php artisan key:generate --force
@@ -31,18 +36,13 @@ else
     echo "[3/5] APP_KEY already set."
 fi
 
-# ── 4. Generate JWT secret if not set ────────────────────────────────────────
+# ── 5. Generate JWT secret if not set ────────────────────────────────────────
 if ! grep -q "^JWT_SECRET=" .env 2>/dev/null || grep -q "^JWT_SECRET=$" .env 2>/dev/null; then
     echo "[4/5] Generating JWT secret..."
     php artisan jwt:secret --force 2>/dev/null || echo "  (jwt:secret skipped — run manually if needed)"
 else
     echo "[4/5] JWT_SECRET already set."
 fi
-
-# ── 5. Ensure Laravel writable directories exist ────────────────────────────
-mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views
-chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
-chmod -R 775 storage bootstrap/cache 2>/dev/null || true
 
 # ── 6. Wait for PostgreSQL then run migrations ──────────────────────────────
 echo "[5/5] Waiting for PostgreSQL..."
