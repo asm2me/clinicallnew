@@ -11,7 +11,7 @@ RUN apk add --no-cache \
 RUN docker-php-ext-install \
     pdo pdo_pgsql \
     zip bcmath mbstring \
-    intl opcache pcntl
+    intl opcache pcntl exif
 
 # Install Redis extension
 RUN pecl install redis && docker-php-ext-enable redis
