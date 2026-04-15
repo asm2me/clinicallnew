@@ -4,7 +4,8 @@ FROM php:8.3-fpm-alpine
 RUN apk add --no-cache \
     git curl zip unzip libzip-dev \
     postgresql-dev icu-dev oniguruma-dev \
-    linux-headers $PHPIZE_DEPS
+    linux-headers $PHPIZE_DEPS \
+    bash
 
 # Install PHP extensions
 RUN docker-php-ext-install \
@@ -15,22 +16,17 @@ RUN docker-php-ext-install \
 # Install Redis extension
 RUN pecl install redis && docker-php-ext-enable redis
 
-# Install Composer
+# Install Composer globally
 COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
 
-# Set working directory
 WORKDIR /var/www/html
 
-# Copy application
-COPY . .
-
-# Install dependencies (production)
-RUN composer install --no-dev --optimize-autoloader --no-interaction
-
-# Set permissions
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
-    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+# Copy entrypoint (from build context = project root)
+COPY docker/php/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY docker/php/php.ini /usr/local/etc/php/conf.d/custom.ini
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 EXPOSE 9000
 
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["php-fpm"]
