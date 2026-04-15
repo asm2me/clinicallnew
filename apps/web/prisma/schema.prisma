@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// SQLite doesn't natively support enums, using String instead
+// For PostgreSQL, change these to native enums by using database native types
+
+model Tenant {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  clinics Clinic[]
+  users   User[]
+}
+
+model User {
+  id             String  @id @default(cuid())
+  email          String  @unique
+  hashedPassword String
+  name           String
+  role           String  @default("STAFF") // Role: SUPER_ADMIN, TENANT_ADMIN, DOCTOR, STAFF, PATIENT
+  tenantId       String?
+  tenant         Tenant? @relation(fields: [tenantId], references: [id])
+  clinicId       String?
+  clinic         Clinic? @relation(fields: [clinicId], references: [id])
+
+  appointments Appointment[] @relation("DoctorAppointments")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Clinic {
+  id       String @id @default(cuid())
+  name     String
+  city     String
+  manager  String
+  rooms    Int    @default(0)
+  status   String @default("OPERATIONAL") // ClinicStatus: OPERATIONAL, LAUNCHING, UNDER_REVIEW
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  users        User[]
+  appointments Appointment[]
+  patients     Patient[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Patient {
+  id       String @id @default(cuid())
+  name     String
+  mrn      String @unique
+  status   String @default("STABLE") // PatientStatus: STABLE, URGENT, PENDING, NEEDS_FOLLOW_UP
+  team     String?
+  clinicId String
+  clinic   Clinic @relation(fields: [clinicId], references: [id])
+
+  appointments Appointment[]
+
+  createdAt DateTime @default(now())
+  lastVisit DateTime?
+}
+
+model Appointment {
+  id        String   @id @default(cuid())
+  time      DateTime
+  status    String   @default("PENDING") // AppointmentStatus: CONFIRMED, PENDING, CANCELLED, COMPLETED
+  patientId String
+  patient   Patient  @relation(fields: [patientId], references: [id])
+  clinicId  String
+  clinic    Clinic   @relation(fields: [clinicId], references: [id])
+  doctorId  String
+  doctor    User     @relation("DoctorAppointments", fields: [doctorId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
