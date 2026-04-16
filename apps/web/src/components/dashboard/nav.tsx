@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import type { DemoRole } from '@/lib/demo-auth';
 
 type NavItem = { href: string; label: string; icon: string };
 
@@ -15,7 +14,7 @@ const navItems: NavItem[] = [
   { href: '/dashboard/settings', label: 'Settings', icon: '⚙️' },
 ];
 
-type DashboardNavProps = { role: DemoRole };
+type DashboardNavProps = { role: string };
 
 export function DashboardNav({ role }: DashboardNavProps) {
   const pathname = usePathname();
@@ -27,12 +26,10 @@ export function DashboardNav({ role }: DashboardNavProps) {
         const isActive =
           item.href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(item.href);
 
-        const href = `${item.href}?role=${encodeURIComponent(role)}`;
-
         return (
           <Link
             key={item.href}
-            href={href}
+            href={item.href}
             aria-current={isActive ? 'page' : undefined}
             className={[
               'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150',

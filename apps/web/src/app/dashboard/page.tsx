@@ -1,20 +1,16 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
+import { getServerSession } from 'next-auth';
 
 import { DashboardShell } from '@/components/dashboard/shell';
-import { DemoBanner } from '@/components/dashboard/demo-banner';
 import { statusBadge } from '@/lib/status-badge';
-import { getDashboardDemoData } from '@/lib/demo-data';
-import { getDemoSession, type DemoRole } from '@/lib/demo-auth';
+import { getDashboardData } from '@/lib/queries/dashboard';
+import { authOptions } from '@/lib/auth';
 
 export const metadata: Metadata = {
   title: 'Dashboard',
-  description: 'Demo SaaS dashboard overview for clinic operations.'
+  description: 'Dashboard overview for clinic operations.'
 };
-
-function getRoleLabel(role: DemoRole) {
-  return role;
-}
 
 function trendClass(change: string) {
   if (change.startsWith('+')) return 'text-emerald-600 dark:text-emerald-400';
@@ -22,28 +18,20 @@ function trendClass(change: string) {
   return 'text-muted-foreground';
 }
 
-export default function DashboardPage({
-  searchParams
-}: {
-  searchParams?: {
-    role?: string;
-  };
-}) {
-  const session = getDemoSession(searchParams?.role);
-  if (!session) {
+export default async function DashboardPage() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
     redirect('/login');
   }
 
-  const role = session.role as DemoRole;
-  const data = getDashboardDemoData(role);
+  const data = await getDashboardData(session.user.id);
 
   return (
     <DashboardShell
       title="Overview"
-      description="A production-style demo workspace with role-aware insights, notifications, and quick actions."
-      role={role}
+      description="A production-style workspace with role-aware insights, notifications, and quick actions."
+      role={session.user.role as string}
     >
-      <DemoBanner message={`Demo auth enabled. This dashboard uses deterministic sample data for the ${getRoleLabel(role)} experience.`} />
 
       <div className="grid gap-6 lg:grid-cols-4">
         {data.kpis.map((item) => (

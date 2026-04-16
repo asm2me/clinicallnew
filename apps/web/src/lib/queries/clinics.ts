@@ -4,7 +4,10 @@ export async function getClinicsData(userId: string) {
   const user = await db.user.findUnique({ where: { id: userId } });
   if (!user) throw new Error('User not found');
 
-  const where = user.role === 'SUPER_ADMIN' ? {} : { tenantId: user.tenantId };
+  let where: any = {};
+  if (user.role !== 'SUPER_ADMIN' && user.tenantId) {
+    where = { tenantId: user.tenantId };
+  }
 
   const clinics = await db.clinic.findMany({
     where,

@@ -1,39 +1,31 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
+import { getServerSession } from 'next-auth';
 
 import { DashboardShell } from '@/components/dashboard/shell';
-import { DemoBanner } from '@/components/dashboard/demo-banner';
 import { statusBadge } from '@/lib/status-badge';
-import { getDemoSession, type DemoRole } from '@/lib/demo-auth';
-import { getPatientsDemoData } from '@/lib/demo-data';
+import { getPatientsData } from '@/lib/queries/patients';
+import { authOptions } from '@/lib/auth';
 
 export const metadata: Metadata = {
   title: 'Patients',
-  description: 'Demo patient management dashboard view.'
+  description: 'Patient management dashboard view.'
 };
 
-export default function PatientsPage({
-  searchParams
-}: {
-  searchParams?: {
-    role?: string;
-  };
-}) {
-  const session = getDemoSession(searchParams?.role);
-  if (!session) {
+export default async function PatientsPage() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
     redirect('/login');
   }
 
-  const role = session.role as DemoRole;
-  const data = getPatientsDemoData(role);
+  const data = await getPatientsData(session.user.id);
 
   return (
     <DashboardShell
       title="Patients"
-      description="Review patient records, engagement, and care coordination in a polished demo UI."
-      role={role}
+      description="Review patient records, engagement, and care coordination."
+      role={session.user.role as string}
     >
-      <DemoBanner message="Demo auth enabled. Patient directory and status data are sample-only." />
 
       <div className="grid gap-6 lg:grid-cols-4">
         {data.metrics.map((item) => (

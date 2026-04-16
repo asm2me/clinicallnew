@@ -1,38 +1,30 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
+import { getServerSession } from 'next-auth';
 
 import { DashboardShell } from '@/components/dashboard/shell';
-import { DemoBanner } from '@/components/dashboard/demo-banner';
-import { getAnalyticsDemoData } from '@/lib/demo-data';
-import { getDemoSession, type DemoRole } from '@/lib/demo-auth';
+import { getAnalyticsData } from '@/lib/queries/analytics';
+import { authOptions } from '@/lib/auth';
 
 export const metadata: Metadata = {
   title: 'Analytics',
-  description: 'Demo analytics dashboard view.'
+  description: 'Analytics dashboard view.'
 };
 
-export default function AnalyticsPage({
-  searchParams
-}: {
-  searchParams?: {
-    role?: string;
-  };
-}) {
-  const session = getDemoSession(searchParams?.role);
-  if (!session) {
+export default async function AnalyticsPage() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
     redirect('/login');
   }
 
-  const role = session.role as DemoRole;
-  const data = getAnalyticsDemoData(role);
+  const data = await getAnalyticsData(session.user.id);
 
   return (
     <DashboardShell
       title="Analytics"
-      description="A role-aware demo of operational trends, performance metrics, and conversion health."
-      role={role}
+      description="Operational trends, performance metrics, and conversion health."
+      role={session.user.role as string}
     >
-      <DemoBanner message="Demo auth enabled. Analytics values are illustrative and deterministic." />
 
       <div className="grid gap-6 lg:grid-cols-4">
         {data.kpis.map((item) => (

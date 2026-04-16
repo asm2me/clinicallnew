@@ -1,39 +1,31 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
+import { getServerSession } from 'next-auth';
 
 import { DashboardShell } from '@/components/dashboard/shell';
-import { DemoBanner } from '@/components/dashboard/demo-banner';
 import { statusBadge } from '@/lib/status-badge';
-import { getClinicsDemoData } from '@/lib/demo-data';
-import { getDemoSession, type DemoRole } from '@/lib/demo-auth';
+import { getClinicsData } from '@/lib/queries/clinics';
+import { authOptions } from '@/lib/auth';
 
 export const metadata: Metadata = {
   title: 'Clinics',
-  description: 'Demo clinic and tenant management dashboard view.'
+  description: 'Clinic and tenant management dashboard view.'
 };
 
-export default function ClinicsPage({
-  searchParams
-}: {
-  searchParams?: {
-    role?: string;
-  };
-}) {
-  const session = getDemoSession(searchParams?.role);
-  if (!session) {
+export default async function ClinicsPage() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
     redirect('/login');
   }
 
-  const role = session.role as DemoRole;
-  const data = getClinicsDemoData(role);
+  const data = await getClinicsData(session.user.id);
 
   return (
     <DashboardShell
       title="Clinics"
       description="Oversee branches, locations, and operational readiness across the tenant."
-      role={role}
+      role={session.user.role as string}
     >
-      <DemoBanner message="Demo auth enabled. Branch and tenant information shown here is sample data." />
 
       <div className="grid gap-6 lg:grid-cols-3">
         {data.summary.map((item) => (

@@ -4,10 +4,15 @@ export async function getAnalyticsData(userId: string) {
   const user = await db.user.findUnique({ where: { id: userId } });
   if (!user) throw new Error('User not found');
 
-  const where = user.role === 'SUPER_ADMIN' ? {} : user.role === 'TENANT_ADMIN' ? { clinic: { tenantId: user.tenantId } } : { clinicId: user.clinicId };
+  let where: any = {};
+  if (user.role !== 'SUPER_ADMIN' && user.role !== 'TENANT_ADMIN') {
+    where = user.clinicId ? { clinicId: user.clinicId } : {};
+  } else if (user.role === 'TENANT_ADMIN' && user.tenantId) {
+    where = { clinic: { tenantId: user.tenantId } };
+  }
 
   const appointmentCount = await db.appointment.count({ where });
-  const patientCount = await db.patient.count({ where: user.role === 'SUPER_ADMIN' ? {} : { clinicId: user.clinicId } });
+  const patientCount = await db.patient.count({ where: user.role === 'SUPER_ADMIN' ? {} : user.clinicId ? { clinicId: user.clinicId } : {} });
   const confirmedRate = ((await db.appointment.count({ where: { ...where, status: 'CONFIRMED' } })) / appointmentCount * 100).toFixed(1);
 
   return {

@@ -4,7 +4,12 @@ export async function getAppointmentsData(userId: string) {
   const user = await db.user.findUnique({ where: { id: userId }, include: { clinic: true, tenant: true } });
   if (!user) throw new Error('User not found');
 
-  const where = user.role === 'SUPER_ADMIN' ? {} : user.role === 'TENANT_ADMIN' ? { clinic: { tenantId: user.tenantId } } : { clinicId: user.clinicId };
+  let where: any = {};
+  if (user.role !== 'SUPER_ADMIN' && user.role !== 'TENANT_ADMIN') {
+    where = user.clinicId ? { clinicId: user.clinicId } : {};
+  } else if (user.role === 'TENANT_ADMIN' && user.tenantId) {
+    where = { clinic: { tenantId: user.tenantId } };
+  }
 
   const [total, confirmed, pending, cancelled] = await Promise.all([
     db.appointment.count({ where }),

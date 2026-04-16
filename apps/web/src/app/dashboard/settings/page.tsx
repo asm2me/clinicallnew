@@ -1,39 +1,31 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
+import { getServerSession } from 'next-auth';
 
 import { DashboardShell } from '@/components/dashboard/shell';
-import { DemoBanner } from '@/components/dashboard/demo-banner';
 import { statusBadge } from '@/lib/status-badge';
-import { getDemoSession, type DemoRole } from '@/lib/demo-auth';
-import { getSettingsDemoData } from '@/lib/demo-data';
+import { getSettingsData } from '@/lib/queries/settings';
+import { authOptions } from '@/lib/auth';
 
 export const metadata: Metadata = {
   title: 'Settings',
-  description: 'Demo dashboard settings view.'
+  description: 'Dashboard settings view.'
 };
 
-export default function SettingsPage({
-  searchParams
-}: {
-  searchParams?: {
-    role?: string;
-  };
-}) {
-  const session = getDemoSession(searchParams?.role);
-  if (!session) {
+export default async function SettingsPage() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
     redirect('/login');
   }
 
-  const role = session.role as DemoRole;
-  const data = getSettingsDemoData(role);
+  const data = await getSettingsData(session.user.id);
 
   return (
     <DashboardShell
       title="Settings"
       description="Configure account preferences, notification settings, and role-specific controls."
-      role={role}
+      role={session.user.role as string}
     >
-      <DemoBanner message="Demo auth enabled. Settings are editable-looking UI only and do not persist." />
 
       <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
         <section className="odoo-panel p-6">

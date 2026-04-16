@@ -34,7 +34,7 @@ export async function getDashboardData(userId: string) {
       { label: 'API Health', value: '99.9%', note: 'Uptime over 30 days' },
       { label: 'Support Tickets', value: '12', note: 'Resolved this week' }
     );
-  } else if (user.role === 'TENANT_ADMIN') {
+  } else if (user.role === 'TENANT_ADMIN' && user.tenantId) {
     const [appointmentCount, patientCount, userCount, clinicCount] = await Promise.all([
       db.appointment.count({ where: { clinic: { tenantId: user.tenantId } } }),
       db.patient.count({ where: { clinic: { tenantId: user.tenantId } } }),
