@@ -21,7 +21,7 @@ export async function getAppointmentsData(userId: string) {
   const appointments = await db.appointment.findMany({
     where,
     include: { patient: true, clinic: true, doctor: true },
-    orderBy: { time: 'desc' },
+    orderBy: { startsAt: 'desc' },
     take: 10
   });
 
@@ -32,8 +32,8 @@ export async function getAppointmentsData(userId: string) {
       { label: 'Pending', value: pending.toString(), note: 'Awaiting confirmation' },
       { label: 'Cancelled', value: cancelled.toString(), note: 'Rescheduled or withdrawn' }
     ],
-    appointments: appointments.map(a => ({
-      time: a.time.toLocaleString(),
+    appointments: appointments.map((a: any) => ({
+      time: a.startsAt.toLocaleString(),
       patient: a.patient.name,
       clinic: a.clinic.name,
       doctor: a.doctor.name,

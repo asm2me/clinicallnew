@@ -1,17 +1,31 @@
 'use client';
 
+import type { FormEvent } from 'react';
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+
+function getCallbackPath(value: string | null) {
+  if (!value) return '/dashboard';
+
+  try {
+    const url = new URL(value, window.location.origin);
+    return `${url.pathname}${url.search}${url.hash}`;
+  } catch {
+    return value.startsWith('/') ? value : '/dashboard';
+  }
+}
 
 export function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = getCallbackPath(searchParams.get('callbackUrl'));
   const [email, setEmail] = useState('superadmin@clinicall.demo');
   const [password, setPassword] = useState('demo1234');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  async function onSubmit(e: React.FormEvent) {
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError('');
     setLoading(true);
@@ -20,38 +34,48 @@ export function LoginForm() {
       const result = await signIn('credentials', {
         email,
         password,
-        redirect: false
+        redirect: false,
+        callbackUrl
       });
 
       if (result?.error) {
-        setError(result.error || 'Invalid email or password');
-      } else if (result?.ok) {
-        router.push('/dashboard');
+        setError(result.error === 'CredentialsSignin' ? 'Invalid email or password.' : result.error);
+        return;
       }
-    } catch (err) {
-      setError('An error occurred. Please try again.');
+
+      if (result?.ok) {
+        router.replace(result.url ?? callbackUrl);
+        router.refresh();
+        return;
+      }
+
+      setError('Unable to sign in right now. Please try again.');
+    } catch {
+      setError('An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-5 w-full">
-      <div>
+    <form onSubmit={onSubmit} className="space-y-5 w-full rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
+      <div className="space-y-2">
         <label htmlFor="email" className="block text-sm font-medium text-foreground">
-          Email
+          Email address
         </label>
         <input
           id="email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="mt-2 w-full px-3 py-2 border border-border rounded-lg bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          autoComplete="email"
+          placeholder="you@company.com"
+          className="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
           required
         />
       </div>
 
-      <div>
+      <div className="space-y-2">
         <label htmlFor="password" className="block text-sm font-medium text-foreground">
           Password
         </label>
@@ -60,19 +84,38 @@ export function LoginForm() {
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="mt-2 w-full px-3 py-2 border border-border rounded-lg bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          autoComplete="current-password"
+          placeholder="Enter your password"
+          className="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
           required
         />
       </div>
 
-      {error && <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">{error}</div>}
+      {error ? (
+        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          {error}
+        </div>
+      ) : (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+          <p className="font-medium">Development sign-in</p>
+          <p className="mt-1">
+            Use <span className="font-semibold">superadmin@clinicall.demo</span>,{' '}
+            <span className="font-semibold">tenantadmin@clinicall.demo</span>,{' '}
+            <span className="font-semibold">doctor@clinicall.demo</span>,{' '}
+            <span className="font-semibold">staff@clinicall.demo</span>, or{' '}
+            <span className="font-semibold">patient@clinicall.demo</span> with password{' '}
+            <span className="font-semibold">demo1234</span>.
+          </p>
+        </div>
+      )}
 
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-2.5 px-4 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 disabled:opacity-50"
+        aria-busy={loading}
+        className="inline-flex w-full items-center justify-center rounded-lg bg-primary px-4 py-2.5 font-semibold text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {loading ? 'Signing in...' : 'Sign in'}
+        {loading ? 'Signing in…' : 'Sign in to Clinicall'}
       </button>
     </form>
   );
