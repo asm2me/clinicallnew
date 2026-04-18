@@ -39,7 +39,12 @@ export function LoginForm() {
       });
 
       if (result?.error) {
-        setError(result.error === 'CredentialsSignin' ? 'Invalid email or password.' : result.error);
+        const errorMessages: Record<string, string> = {
+          CredentialsSignin: 'Invalid email or password.',
+          Configuration: 'Server configuration error. Please contact support.',
+          AccessDenied: 'Access denied. Your account may be inactive.',
+        };
+        setError(errorMessages[result.error] ?? result.error);
         return;
       }
 
@@ -49,7 +54,7 @@ export function LoginForm() {
         return;
       }
 
-      setError('Unable to sign in right now. Please try again.');
+      setError('Sign in failed. Please check your credentials and try again.');
     } catch {
       setError('An unexpected error occurred. Please try again.');
     } finally {

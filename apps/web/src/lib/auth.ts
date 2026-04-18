@@ -34,9 +34,15 @@ export const authOptions: NextAuthOptions = {
 
         const email = credentials.email.trim().toLowerCase();
 
-        const user = await db.user.findUnique({
-          where: { email }
-        });
+        let user;
+        try {
+          user = await db.user.findUnique({
+            where: { email }
+          });
+        } catch (err) {
+          console.error('[auth] Database query failed:', err);
+          throw new Error('Service temporarily unavailable. Please try again.');
+        }
 
         if (!user) {
           throw new Error('Invalid credentials');
@@ -52,10 +58,15 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Invalid credentials');
         }
 
-        await db.user.update({
-          where: { id: user.id },
-          data: { lastLoginAt: new Date() }
-        });
+        try {
+          await db.user.update({
+            where: { id: user.id },
+            data: { lastLoginAt: new Date() }
+          });
+        } catch (err) {
+          console.error('[auth] Failed to update lastLoginAt:', err);
+          // Non-critical — continue signing in
+        }
 
         return {
           id: user.id,
