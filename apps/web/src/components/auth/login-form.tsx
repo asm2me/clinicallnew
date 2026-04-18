@@ -44,17 +44,19 @@ export function LoginForm() {
 
       console.log('[login] signIn result:', JSON.stringify(result, null, 2));
 
-      if (result?.error) {
-        const errorMessages: Record<string, string> = {
-          CredentialsSignin: 'Invalid email or password.',
-          Configuration: 'Server configuration error. Please contact support.',
-          AccessDenied: 'Access denied. Your account may be inactive.',
-        };
-        const displayError = errorMessages[result.error] ?? result.error;
-        setError(displayError);
-        setDebugInfo(`Error code: ${result.error} | ok: ${result.ok} | status: ${result.status}`);
-        return;
-      }
+        if (result?.error) {
+          const errorMessages: Record<string, string> = {
+            CredentialsSignin: 'Invalid email or password.',
+            Configuration: 'Server configuration error. Please contact support.',
+            AccessDenied: 'Access denied. Your account may be inactive.',
+            'Database connection unavailable. Please try again.': 'Clinicall is temporarily unavailable because the database cannot be reached.',
+            'Authentication service error. Please try again.': 'Clinicall is temporarily unavailable. Please try again in a few minutes.',
+          };
+          const displayError = errorMessages[result.error] ?? result.error;
+          setError(displayError);
+          setDebugInfo(`Error code: ${result.error} | ok: ${result.ok} | status: ${result.status}`);
+          return;
+        }
 
       if (result?.ok) {
         router.replace(result.url ?? callbackUrl);
