@@ -23,14 +23,18 @@ export function LoginForm() {
   const [email, setEmail] = useState('superadmin@clinicall.demo');
   const [password, setPassword] = useState('demo1234');
   const [error, setError] = useState('');
+  const [debugInfo, setDebugInfo] = useState('');
   const [loading, setLoading] = useState(false);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError('');
+    setDebugInfo('');
     setLoading(true);
 
     try {
+      console.log('[login] Attempting sign-in for:', email);
+
       const result = await signIn('credentials', {
         email,
         password,
@@ -38,13 +42,17 @@ export function LoginForm() {
         callbackUrl
       });
 
+      console.log('[login] signIn result:', JSON.stringify(result, null, 2));
+
       if (result?.error) {
         const errorMessages: Record<string, string> = {
           CredentialsSignin: 'Invalid email or password.',
           Configuration: 'Server configuration error. Please contact support.',
           AccessDenied: 'Access denied. Your account may be inactive.',
         };
-        setError(errorMessages[result.error] ?? result.error);
+        const displayError = errorMessages[result.error] ?? result.error;
+        setError(displayError);
+        setDebugInfo(`Error code: ${result.error} | ok: ${result.ok} | status: ${result.status}`);
         return;
       }
 
@@ -54,9 +62,14 @@ export function LoginForm() {
         return;
       }
 
+      // Neither error nor ok — log everything we can
+      console.error('[login] Unexpected signIn result:', result);
       setError('Sign in failed. Please check your credentials and try again.');
-    } catch {
+      setDebugInfo(`Raw result: ${JSON.stringify(result)}`);
+    } catch (err: any) {
+      console.error('[login] Exception during sign-in:', err);
       setError('An unexpected error occurred. Please try again.');
+      setDebugInfo(err?.message || String(err));
     } finally {
       setLoading(false);
     }
@@ -98,7 +111,10 @@ export function LoginForm() {
 
       {error ? (
         <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-          {error}
+          <p>{error}</p>
+          {debugInfo && (
+            <pre className="mt-2 overflow-x-auto whitespace-pre-wrap rounded bg-red-100 p-2 text-xs text-red-800">{debugInfo}</pre>
+          )}
         </div>
       ) : (
         <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
