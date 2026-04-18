@@ -22,6 +22,16 @@ function normalizeString(value: string | null | undefined) {
   return value ?? null;
 }
 
+function isPrismaConnectionError(err: any) {
+  const code = err?.code || err?.meta?.code;
+  return (
+    code === 'P1001' ||
+    code === 'P1002' ||
+    code === 'P1017' ||
+    /connection|connect|timeout|refused|closed|unavailable/i.test(err?.message || '')
+  );
+}
+
 export const authOptions: NextAuthOptions = {
   secret: authSecret,
   session: {
@@ -56,7 +66,10 @@ export const authOptions: NextAuthOptions = {
           console.log('[auth:authorize] User found:', user ? { id: user.id, email: user.email, role: user.role, isActive: user.isActive } : null);
         } catch (err: any) {
           console.error('[auth:authorize] Database query failed:', err?.message || err);
-          throw new Error('Service temporarily unavailable. Please try again.');
+          if (isPrismaConnectionError(err)) {
+            throw new Error('Database connection unavailable. Please try again.');
+          }
+          throw new Error('Authentication service error. Please try again.');
         }
 
         if (!user) {
