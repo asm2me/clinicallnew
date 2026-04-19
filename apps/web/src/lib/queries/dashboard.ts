@@ -1,15 +1,18 @@
 import { db } from '@/lib/db';
 
-export async function getDashboardData(userId: string) {
-  const user = await db.user.findUnique({ where: { id: userId }, include: { clinic: true, tenant: true } });
-  if (!user) throw new Error('User not found');
+type DashboardContext = {
+  userId: string;
+  role: string;
+  tenantId?: string | null;
+};
 
+export async function getDashboardData({ userId, role, tenantId }: DashboardContext) {
   const kpis = [];
   const activities = [];
   const highlights = [];
 
-  if (user.role === 'SUPER_ADMIN') {
-    const [totalUsers, totalClinics, totalAppointments, totalPatients] = await Promise.all([
+  if (role === 'SUPER_ADMIN') {
+    const [totalUsers, totalClinics, totalAppointments, totalPatients] = await db.$transaction([
       db.user.count(),
       db.clinic.count(),
       db.appointment.count(),
@@ -34,12 +37,12 @@ export async function getDashboardData(userId: string) {
       { label: 'API Health', value: '99.9%', note: 'Uptime over 30 days' },
       { label: 'Support Tickets', value: '12', note: 'Resolved this week' }
     );
-  } else if (user.role === 'TENANT_ADMIN' && user.tenantId) {
-    const [appointmentCount, patientCount, userCount, clinicCount] = await Promise.all([
-      db.appointment.count({ where: { clinic: { tenantId: user.tenantId } } }),
-      db.patient.count({ where: { clinic: { tenantId: user.tenantId } } }),
-      db.user.count({ where: { tenantId: user.tenantId } }),
-      db.clinic.count({ where: { tenantId: user.tenantId } })
+  } else if (role === 'TENANT_ADMIN' && tenantId) {
+    const [appointmentCount, patientCount, userCount, clinicCount] = await db.$transaction([
+      db.appointment.count({ where: { clinic: { tenantId } } }),
+      db.patient.count({ where: { clinic: { tenantId } } }),
+      db.user.count({ where: { tenantId } }),
+      db.clinic.count({ where: { tenantId } })
     ]);
 
     kpis.push(

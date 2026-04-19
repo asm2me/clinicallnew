@@ -24,7 +24,11 @@ export default async function DashboardPage() {
     redirect('/login');
   }
 
-  const data = await getDashboardData(session.user.id);
+  const data = await getDashboardData({
+    userId: session.user.id,
+    role: session.user.role as string,
+    tenantId: session.user.tenantId ?? null
+  });
 
   return (
     <DashboardShell

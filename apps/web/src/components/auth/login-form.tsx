@@ -60,7 +60,6 @@ export function LoginForm() {
 
       if (result?.ok) {
         router.replace(result.url ?? callbackUrl);
-        router.refresh();
         return;
       }
 
