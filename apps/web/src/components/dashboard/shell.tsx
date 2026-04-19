@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { SignOutButton } from '@/components/auth/sign-out-button';
 import { DashboardNav } from '@/components/dashboard/nav';
 
 type DashboardShellProps = {
@@ -55,17 +56,7 @@ export function DashboardShell({ title, description, role, children }: Dashboard
             </div>
 
             <div className="mt-6 border-t border-border pt-5">
-              <form
-                action={async () => {
-                  'use server';
-                  const { signOut } = await import('next-auth/react');
-                  await signOut();
-                }}
-              >
-                <button type="submit" className="odoo-button-secondary w-full justify-center">
-                  Sign out
-                </button>
-              </form>
+              <SignOutButton />
             </div>
           </div>
         </aside>
