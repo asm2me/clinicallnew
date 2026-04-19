@@ -1,4 +1,4 @@
-import { createBrowserClient } from '@supabase/supabase-js';
+import { createBrowserClient } from '@supabase/ssr';
 
 type SupabaseBrowserClient = ReturnType<typeof createBrowserClient>;
 
