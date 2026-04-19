@@ -44,6 +44,7 @@ const updateUserSchema = z.object({
 
 const deleteUserSchema = z.object({
   userId: z.string().trim().min(1, 'User id is required'),
+  confirmationText: z.string().trim().min(1, 'Type the user email to confirm deletion.'),
 });
 
 type Actor = {
@@ -359,10 +360,11 @@ export async function deleteUserAction(formData: FormData): Promise<void> {
 
   const parsed = deleteUserSchema.safeParse({
     userId: getString(formData, 'userId'),
+    confirmationText: getString(formData, 'confirmationText'),
   });
 
   if (!parsed.success) {
-    redirectWithError(parsed.error.issues[0]?.message ?? 'User id is invalid.');
+    redirectWithError(parsed.error.issues[0]?.message ?? 'Delete confirmation is invalid.');
   }
 
   if (parsed.data.userId === actor.id) {
@@ -370,16 +372,47 @@ export async function deleteUserAction(formData: FormData): Promise<void> {
   }
 
   const existingUser = await getManagedUser(actor, parsed.data.userId);
+  const expectedConfirmation = existingUser.email.toLowerCase();
+
+  if (parsed.data.confirmationText.trim().toLowerCase() !== expectedConfirmation) {
+    redirectWithError(`Type ${existingUser.email} exactly to confirm deletion.`);
+  }
 
   try {
-    await db.user.delete({
-      where: { id: existingUser.id },
+    await db.$transaction(async (tx) => {
+      await tx.passwordResetToken.deleteMany({
+        where: { userId: existingUser.id },
+      });
+
+      await tx.auditLog.deleteMany({
+        where: { actorId: existingUser.id },
+      });
+
+      await tx.appointment.deleteMany({
+        where: { doctorId: existingUser.id },
+      });
+
+      const linkedPatientId = (existingUser as { patientId?: string | null }).patientId ?? null;
+
+      if (linkedPatientId) {
+        await tx.appointment.deleteMany({
+          where: { patientId: linkedPatientId },
+        });
+
+        await tx.patient.delete({
+          where: { id: linkedPatientId },
+        });
+      }
+
+      await tx.user.delete({
+        where: { id: existingUser.id },
+      });
     });
   } catch (error) {
     console.error('deleteUserAction failed', error);
-    redirectWithError('This user could not be deleted safely because related records still exist.');
+    redirectWithError('The user and related records could not be deleted.');
   }
 
   revalidatePath(SETTINGS_PATH);
-  redirectWithMessage('User deleted successfully.');
+  redirectWithMessage('User and related records deleted successfully.');
 }
