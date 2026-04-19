@@ -1,0 +1,385 @@
+'use server';
+
+import { hash } from 'bcryptjs';
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+import { getServerSession } from 'next-auth';
+import { z } from 'zod';
+
+import { authOptions } from '../../../lib/auth';
+import { db } from '../../../lib/db';
+
+const SETTINGS_PATH = '/dashboard/settings';
+const ADMIN_ROLES = ['SUPER_ADMIN', 'TENANT_ADMIN'] as const;
+const USER_ROLES = ['SUPER_ADMIN', 'TENANT_ADMIN', 'DOCTOR', 'STAFF', 'PATIENT'] as const;
+
+const profileSchema = z.object({
+  name: z.string().trim().min(1, 'Name is required').max(120, 'Name is too long'),
+  phone: z.string().trim().max(50, 'Phone is too long').optional(),
+  title: z.string().trim().max(120, 'Title is too long').optional(),
+});
+
+const createUserSchema = z.object({
+  name: z.string().trim().min(1, 'Name is required').max(120, 'Name is too long'),
+  email: z.string().trim().email('A valid email address is required'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  role: z.enum(USER_ROLES),
+  phone: z.string().trim().max(50, 'Phone is too long').optional(),
+  title: z.string().trim().max(120, 'Title is too long').optional(),
+  tenantId: z.string().trim().optional(),
+  clinicId: z.string().trim().optional(),
+});
+
+const updateUserSchema = z.object({
+  userId: z.string().trim().min(1, 'User id is required'),
+  name: z.string().trim().min(1, 'Name is required').max(120, 'Name is too long'),
+  email: z.string().trim().email('A valid email address is required'),
+  password: z.string().optional(),
+  role: z.enum(USER_ROLES),
+  phone: z.string().trim().max(50, 'Phone is too long').optional(),
+  title: z.string().trim().max(120, 'Title is too long').optional(),
+  tenantId: z.string().trim().optional(),
+  clinicId: z.string().trim().optional(),
+});
+
+const deleteUserSchema = z.object({
+  userId: z.string().trim().min(1, 'User id is required'),
+});
+
+type Actor = {
+  id: string;
+  role: (typeof USER_ROLES)[number];
+  tenantId: string | null;
+  clinicId: string | null;
+};
+
+type TargetAssignment = {
+  tenantId: string | null;
+  clinicId: string | null;
+};
+
+function getString(formData: FormData, key: string) {
+  const value = formData.get(key);
+
+  if (typeof value !== 'string') {
+    return '';
+  }
+
+  return value;
+}
+
+function toOptional(value: string) {
+  const trimmed = value.trim();
+
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
+function toNullable(value: string) {
+  const trimmed = value.trim();
+
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+function redirectWithError(message: string): never {
+  redirect(`${SETTINGS_PATH}?error=${encodeURIComponent(message)}`);
+}
+
+function redirectWithMessage(message: string): never {
+  redirect(`${SETTINGS_PATH}?message=${encodeURIComponent(message)}`);
+}
+
+async function getActor(): Promise<Actor> {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user?.id) {
+    redirectWithError('You must be signed in to manage settings.');
+  }
+
+  const actor = await db.user.findUnique({
+    where: { id: session.user.id },
+  });
+
+  if (!actor) {
+    redirectWithError('Your account could not be found.');
+  }
+
+  return {
+    id: actor.id,
+    role: actor.role as Actor['role'],
+    tenantId: (actor as { tenantId?: string | null }).tenantId ?? null,
+    clinicId: (actor as { clinicId?: string | null }).clinicId ?? null,
+  };
+}
+
+function ensureAdmin(actor: Actor) {
+  if (!ADMIN_ROLES.includes(actor.role as (typeof ADMIN_ROLES)[number])) {
+    redirectWithError('You are not allowed to manage users.');
+  }
+}
+
+async function resolveAssignment(
+  actor: Actor,
+  role: (typeof USER_ROLES)[number],
+  tenantIdInput: string | undefined,
+  clinicIdInput: string | undefined,
+): Promise<TargetAssignment> {
+  if (role === 'SUPER_ADMIN') {
+    if (actor.role !== 'SUPER_ADMIN') {
+      redirectWithError('Only super admins can create or update super admin users.');
+    }
+
+    return { tenantId: null, clinicId: null };
+  }
+
+  let tenantId: string | null = null;
+
+  if (actor.role === 'SUPER_ADMIN') {
+    tenantId = toNullable(tenantIdInput ?? '');
+
+    if (!tenantId) {
+      redirectWithError('A tenant is required for this user.');
+    }
+
+    const tenant = await db.tenant.findUnique({
+      where: { id: tenantId },
+    });
+
+    if (!tenant) {
+      redirectWithError('The selected tenant was not found.');
+    }
+  } else {
+    if (!actor.tenantId) {
+      redirectWithError('Your account is missing a tenant assignment.');
+    }
+
+    tenantId = actor.tenantId;
+  }
+
+  const clinicId = toNullable(clinicIdInput ?? '');
+
+  if (!clinicId) {
+    return { tenantId, clinicId: null };
+  }
+
+  const clinic = await db.clinic.findUnique({
+    where: { id: clinicId },
+  });
+
+  if (!clinic) {
+    redirectWithError('The selected clinic was not found.');
+  }
+
+  const clinicTenantId = (clinic as { tenantId?: string | null }).tenantId ?? null;
+
+  if (!clinicTenantId) {
+    redirectWithError('The selected clinic is missing a tenant assignment.');
+  }
+
+  if (actor.role === 'TENANT_ADMIN' && clinicTenantId !== actor.tenantId) {
+    redirectWithError('You can only assign users to clinics in your tenant.');
+  }
+
+  if (tenantId && clinicTenantId !== tenantId) {
+    redirectWithError('The selected clinic does not belong to the selected tenant.');
+  }
+
+  return {
+    tenantId: clinicTenantId,
+    clinicId: clinic.id,
+  };
+}
+
+async function getManagedUser(actor: Actor, userId: string) {
+  const user = await db.user.findUnique({
+    where: { id: userId },
+  });
+
+  if (!user) {
+    redirectWithError('The selected user was not found.');
+  }
+
+  const userRole = user.role as Actor['role'];
+  const userTenantId = (user as { tenantId?: string | null }).tenantId ?? null;
+
+  if (actor.role === 'TENANT_ADMIN') {
+    if (!actor.tenantId || userTenantId !== actor.tenantId) {
+      redirectWithError('You can only manage users in your tenant.');
+    }
+
+    if (userRole === 'SUPER_ADMIN') {
+      redirectWithError('Tenant admins cannot manage super admin users.');
+    }
+  }
+
+  return user;
+}
+
+export async function updateProfileAction(formData: FormData): Promise<void> {
+  const actor = await getActor();
+
+  const parsed = profileSchema.safeParse({
+    name: getString(formData, 'name'),
+    phone: toOptional(getString(formData, 'phone')),
+    title: toOptional(getString(formData, 'title')),
+  });
+
+  if (!parsed.success) {
+    redirectWithError(parsed.error.issues[0]?.message ?? 'Profile details are invalid.');
+  }
+
+  await db.user.update({
+    where: { id: actor.id },
+    data: {
+      name: parsed.data.name,
+      phone: parsed.data.phone ?? null,
+      title: parsed.data.title ?? null,
+    } as never,
+  });
+
+  revalidatePath(SETTINGS_PATH);
+  redirectWithMessage('Your profile was updated successfully.');
+}
+
+export async function createUserAction(formData: FormData): Promise<void> {
+  const actor = await getActor();
+  ensureAdmin(actor);
+
+  const parsed = createUserSchema.safeParse({
+    name: getString(formData, 'name'),
+    email: getString(formData, 'email').toLowerCase(),
+    password: getString(formData, 'password'),
+    role: getString(formData, 'role'),
+    phone: toOptional(getString(formData, 'phone')),
+    title: toOptional(getString(formData, 'title')),
+    tenantId: toOptional(getString(formData, 'tenantId')),
+    clinicId: toOptional(getString(formData, 'clinicId')),
+  });
+
+  if (!parsed.success) {
+    redirectWithError(parsed.error.issues[0]?.message ?? 'User details are invalid.');
+  }
+
+  const assignment = await resolveAssignment(
+    actor,
+    parsed.data.role,
+    parsed.data.tenantId,
+    parsed.data.clinicId,
+  );
+
+  try {
+    await db.user.create({
+      data: {
+        name: parsed.data.name,
+        email: parsed.data.email,
+        hashedPassword: await hash(parsed.data.password, 10),
+        role: parsed.data.role,
+        phone: parsed.data.phone ?? null,
+        title: parsed.data.title ?? null,
+        tenantId: assignment.tenantId,
+        clinicId: assignment.clinicId,
+      } as never,
+    });
+  } catch (error) {
+    console.error('createUserAction failed', error);
+    redirectWithError('The user could not be created. Check for duplicate email addresses or invalid assignments.');
+  }
+
+  revalidatePath(SETTINGS_PATH);
+  redirectWithMessage('User created successfully.');
+}
+
+export async function updateUserAction(formData: FormData): Promise<void> {
+  const actor = await getActor();
+  ensureAdmin(actor);
+
+  const parsed = updateUserSchema.safeParse({
+    userId: getString(formData, 'userId'),
+    name: getString(formData, 'name'),
+    email: getString(formData, 'email').toLowerCase(),
+    password: getString(formData, 'password'),
+    role: getString(formData, 'role'),
+    phone: toOptional(getString(formData, 'phone')),
+    title: toOptional(getString(formData, 'title')),
+    tenantId: toOptional(getString(formData, 'tenantId')),
+    clinicId: toOptional(getString(formData, 'clinicId')),
+  });
+
+  if (!parsed.success) {
+    redirectWithError(parsed.error.issues[0]?.message ?? 'User details are invalid.');
+  }
+
+  const existingUser = await getManagedUser(actor, parsed.data.userId);
+  const assignment = await resolveAssignment(
+    actor,
+    parsed.data.role,
+    parsed.data.tenantId,
+    parsed.data.clinicId,
+  );
+
+  if (actor.role === 'TENANT_ADMIN' && existingUser.id === actor.id && parsed.data.role !== 'TENANT_ADMIN') {
+    redirectWithError('Tenant admins cannot change their own role from this screen.');
+  }
+
+  const password = parsed.data.password?.trim();
+  const data: Record<string, unknown> = {
+    name: parsed.data.name,
+    email: parsed.data.email,
+    role: parsed.data.role,
+    phone: parsed.data.phone ?? null,
+    title: parsed.data.title ?? null,
+    tenantId: assignment.tenantId,
+    clinicId: assignment.clinicId,
+  };
+
+  if (password) {
+    if (password.length < 6) {
+      redirectWithError('Password must be at least 6 characters.');
+    }
+
+    data.hashedPassword = await hash(password, 10);
+  }
+
+  try {
+    await db.user.update({
+      where: { id: existingUser.id },
+      data: data as never,
+    });
+  } catch (error) {
+    console.error('updateUserAction failed', error);
+    redirectWithError('The user could not be updated. Check for duplicate email addresses or invalid assignments.');
+  }
+
+  revalidatePath(SETTINGS_PATH);
+  redirectWithMessage('User updated successfully.');
+}
+
+export async function deleteUserAction(formData: FormData): Promise<void> {
+  const actor = await getActor();
+  ensureAdmin(actor);
+
+  const parsed = deleteUserSchema.safeParse({
+    userId: getString(formData, 'userId'),
+  });
+
+  if (!parsed.success) {
+    redirectWithError(parsed.error.issues[0]?.message ?? 'User id is invalid.');
+  }
+
+  if (parsed.data.userId === actor.id) {
+    redirectWithError('You cannot delete your own account.');
+  }
+
+  const existingUser = await getManagedUser(actor, parsed.data.userId);
+
+  try {
+    await db.user.delete({
+      where: { id: existingUser.id },
+    });
+  } catch (error) {
+    console.error('deleteUserAction failed', error);
+    redirectWithError('This user could not be deleted safely because related records still exist.');
+  }
+
+  revalidatePath(SETTINGS_PATH);
+  redirectWithMessage('User deleted successfully.');
+}

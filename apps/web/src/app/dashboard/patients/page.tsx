@@ -1,74 +1,324 @@
-import type { Metadata } from 'next';
+import type { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 
 import { DashboardShell } from '@/components/dashboard/shell';
-import { statusBadge } from '@/lib/status-badge';
-import { getPatientsData } from '@/lib/queries/patients';
 import { authOptions } from '@/lib/auth';
+import { getPatientsData } from '@/lib/queries/patients';
 
-export const metadata: Metadata = {
-  title: 'Patients',
-  description: 'Patient management dashboard view.'
+import {
+  createPatientAction,
+  deletePatientAction,
+  updatePatientAction,
+} from './actions';
+
+type PatientsPageProps = {
+  searchParams?: {
+    message?: string;
+    error?: string;
+  };
 };
 
-export default async function PatientsPage() {
+function getBadgeClass(status: string) {
+  const normalized = status.toUpperCase();
+
+  if (normalized === 'ACTIVE') {
+    return 'odoo-badge bg-emerald-100 text-emerald-700';
+  }
+
+  if (normalized === 'INACTIVE') {
+    return 'odoo-badge bg-slate-200 text-slate-700';
+  }
+
+  if (normalized.includes('FOLLOW') || normalized.includes('REVIEW')) {
+    return 'odoo-badge bg-amber-100 text-amber-700';
+  }
+
+  return 'odoo-badge';
+}
+
+function Banner({
+  tone,
+  children,
+}: {
+  tone: 'success' | 'error';
+  children: ReactNode;
+}) {
+  return (
+    <div
+      className={`rounded-xl border px-4 py-3 text-sm ${
+        tone === 'success'
+          ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+          : 'border-rose-200 bg-rose-50 text-rose-700'
+      }`}
+    >
+      {children}
+    </div>
+  );
+}
+
+function FormField({
+  label,
+  name,
+  defaultValue,
+  placeholder,
+  required,
+  type = 'text',
+}: {
+  label: string;
+  name: string;
+  defaultValue?: string | null;
+  placeholder?: string;
+  required?: boolean;
+  type?: string;
+}) {
+  return (
+    <label className="flex flex-col gap-2 text-sm text-slate-600">
+      <span className="font-medium text-slate-700">{label}</span>
+      <input
+        className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+        defaultValue={defaultValue ?? ''}
+        name={name}
+        placeholder={placeholder}
+        required={required}
+        type={type}
+      />
+    </label>
+  );
+}
+
+export default async function PatientsPage({ searchParams }: PatientsPageProps) {
   const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) {
     redirect('/login');
   }
 
   const data = await getPatientsData(session.user.id);
+  const canCreate = data.canMutate && data.clinicOptions.length > 0;
 
   return (
-    <DashboardShell
-      title="Patients"
-      description="Review patient records, engagement, and care coordination."
-      role={session.user.role as string}
-    >
-
-      <div className="grid gap-6 lg:grid-cols-4">
-        {data.metrics.map((item) => (
-          <article key={item.label} className="odoo-kpi p-5">
-            <p className="text-sm font-medium text-muted-foreground">{item.label}</p>
-            <p className="mt-3 text-3xl font-bold text-foreground">{item.value}</p>
-            <p className="mt-2 text-sm text-muted-foreground">{item.note}</p>
-          </article>
-        ))}
-      </div>
-
-      <section className="odoo-panel mt-6 overflow-hidden">
-        <div className="border-b border-border p-6">
-          <h2 className="text-xl font-semibold text-foreground">Patient roster</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Most recent and priority patients visible to the selected role.</p>
+    <DashboardShell role={session.user.role as string}>
+      <div className="space-y-6">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-2xl font-semibold text-slate-900">Patients</h1>
+          <p className="text-sm text-slate-500">
+            Manage patient records, clinic assignments, and chart details.
+          </p>
         </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-border text-left text-sm">
-            <thead className="bg-muted/60 text-muted-foreground">
-              <tr>
-                <th className="px-6 py-4 font-semibold">Patient</th>
-                <th className="px-6 py-4 font-semibold">MRN</th>
-                <th className="px-6 py-4 font-semibold">Last visit</th>
-                <th className="px-6 py-4 font-semibold">Care team</th>
-                <th className="px-6 py-4 font-semibold">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border bg-card">
-              {data.patients.map((item) => (
-                <tr key={item.name} className="transition-colors hover:bg-muted/40">
-                  <td className="px-6 py-4 font-medium text-foreground">{item.name}</td>
-                  <td className="px-6 py-4 text-muted-foreground">{item.mrn}</td>
-                  <td className="px-6 py-4 text-muted-foreground">{item.lastVisit}</td>
-                  <td className="px-6 py-4 text-muted-foreground">{item.team}</td>
-                  <td className="px-6 py-4">
-                    <span className={statusBadge(item.status)}>{item.status}</span>
-                  </td>
+        {searchParams?.message ? <Banner tone="success">{searchParams.message}</Banner> : null}
+        {searchParams?.error ? <Banner tone="error">{searchParams.error}</Banner> : null}
+
+        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="odoo-kpi">
+            <p className="text-sm text-slate-500">Total patients</p>
+            <p className="mt-2 text-3xl font-semibold text-slate-900">{data.stats.totalPatients}</p>
+          </div>
+          <div className="odoo-kpi">
+            <p className="text-sm text-slate-500">Active</p>
+            <p className="mt-2 text-3xl font-semibold text-slate-900">{data.stats.activePatients}</p>
+          </div>
+          <div className="odoo-kpi">
+            <p className="text-sm text-slate-500">Inactive</p>
+            <p className="mt-2 text-3xl font-semibold text-slate-900">{data.stats.inactivePatients}</p>
+          </div>
+          <div className="odoo-kpi">
+            <p className="text-sm text-slate-500">Seen this month</p>
+            <p className="mt-2 text-3xl font-semibold text-slate-900">{data.stats.seenThisMonth}</p>
+          </div>
+        </section>
+
+        {data.canMutate ? (
+          <section className="odoo-panel space-y-4">
+            <div className="flex flex-col gap-1">
+              <h2 className="text-lg font-semibold text-slate-900">Create patient</h2>
+              <p className="text-sm text-slate-500">
+                Add a new patient record and assign it to a clinic within your allowed scope.
+              </p>
+            </div>
+
+            {!canCreate ? (
+              <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+                You need at least one accessible clinic before creating patients.
+              </div>
+            ) : (
+              <form action={createPatientAction} className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <FormField label="Patient name" name="name" placeholder="John Doe" required />
+                <FormField label="MRN" name="mrn" placeholder="MRN-1001" required />
+                <label className="flex flex-col gap-2 text-sm text-slate-600">
+                  <span className="font-medium text-slate-700">Clinic</span>
+                  <select
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+                    name="clinicId"
+                    required
+                  >
+                    <option value="">Select clinic</option>
+                    {data.clinicOptions.map((clinic) => (
+                      <option key={clinic.id} value={clinic.id}>
+                        {clinic.name} {clinic.city ? `(${clinic.city})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <FormField label="Status" name="status" placeholder="ACTIVE" required />
+                <FormField label="Email" name="email" placeholder="patient@example.com" type="email" />
+                <FormField label="Phone" name="phone" placeholder="+1 555 0100" />
+                <FormField label="Team" name="team" placeholder="Care team" />
+                <FormField label="Gender" name="gender" placeholder="FEMALE" />
+                <FormField label="Emergency contact" name="emergencyContact" placeholder="Contact name" />
+                <FormField label="Emergency phone" name="emergencyPhone" placeholder="+1 555 0111" />
+                <FormField label="Last visit" name="lastVisit" type="date" />
+                <label className="flex flex-col gap-2 text-sm text-slate-600 md:col-span-2 xl:col-span-4">
+                  <span className="font-medium text-slate-700">Notes</span>
+                  <textarea
+                    className="min-h-28 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+                    name="notes"
+                    placeholder="Clinical notes or care context"
+                  />
+                </label>
+
+                <div className="md:col-span-2 xl:col-span-4">
+                  <button
+                    className="inline-flex items-center rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
+                    type="submit"
+                  >
+                    Create patient
+                  </button>
+                </div>
+              </form>
+            )}
+          </section>
+        ) : null}
+
+        <section className="odoo-panel">
+          <div className="mb-4 flex flex-col gap-1">
+            <h2 className="text-lg font-semibold text-slate-900">Patient registry</h2>
+            <p className="text-sm text-slate-500">Review patient records, details, and clinic ownership.</p>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
+              <thead>
+                <tr className="text-slate-500">
+                  <th className="px-4 py-3 font-medium">Patient</th>
+                  <th className="px-4 py-3 font-medium">MRN</th>
+                  <th className="px-4 py-3 font-medium">Clinic</th>
+                  <th className="px-4 py-3 font-medium">Status</th>
+                  <th className="px-4 py-3 font-medium">Contact</th>
+                  <th className="px-4 py-3 font-medium">Last visit</th>
+                  <th className="px-4 py-3 font-medium">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {data.patients.length === 0 ? (
+                  <tr>
+                    <td className="px-4 py-6 text-sm text-slate-500" colSpan={7}>
+                      No patients found for your current scope.
+                    </td>
+                  </tr>
+                ) : (
+                  data.patients.map((patient) => (
+                    <tr key={patient.id} className="align-top">
+                      <td className="px-4 py-4">
+                        <div className="font-medium text-slate-900">{patient.name}</div>
+                        <div className="mt-1 text-xs text-slate-500">{patient.team || 'No team assigned'}</div>
+                      </td>
+                      <td className="px-4 py-4 text-slate-600">{patient.mrn}</td>
+                      <td className="px-4 py-4 text-slate-600">{patient.clinicName}</td>
+                      <td className="px-4 py-4">
+                        <span className={getBadgeClass(patient.status)}>{patient.status}</span>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="text-slate-700">{patient.email || '—'}</div>
+                        <div className="mt-1 text-xs text-slate-500">{patient.phone || 'No phone'}</div>
+                      </td>
+                      <td className="px-4 py-4 text-slate-600">{patient.lastVisitLabel}</td>
+                      <td className="px-4 py-4">
+                        {data.canMutate ? (
+                          <div className="flex min-w-[20rem] flex-col gap-3">
+                            <details className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                              <summary className="cursor-pointer list-none text-sm font-medium text-sky-700">
+                                Edit patient
+                              </summary>
+
+                              <form action={updatePatientAction} className="mt-3 grid gap-3">
+                                <input name="id" type="hidden" value={patient.id} />
+
+                                <FormField label="Patient name" name="name" defaultValue={patient.name} required />
+                                <FormField label="MRN" name="mrn" defaultValue={patient.mrn} required />
+                                <label className="flex flex-col gap-2 text-sm text-slate-600">
+                                  <span className="font-medium text-slate-700">Clinic</span>
+                                  <select
+                                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+                                    defaultValue={patient.clinicId}
+                                    name="clinicId"
+                                    required
+                                  >
+                                    <option value="">Select clinic</option>
+                                    {data.clinicOptions.map((clinic) => (
+                                      <option key={clinic.id} value={clinic.id}>
+                                        {clinic.name} {clinic.city ? `(${clinic.city})` : ''}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </label>
+                                <FormField label="Status" name="status" defaultValue={patient.status} required />
+                                <FormField label="Email" name="email" defaultValue={patient.email} type="email" />
+                                <FormField label="Phone" name="phone" defaultValue={patient.phone} />
+                                <FormField label="Team" name="team" defaultValue={patient.team} />
+                                <FormField label="Gender" name="gender" defaultValue={patient.gender} />
+                                <FormField
+                                  label="Emergency contact"
+                                  name="emergencyContact"
+                                  defaultValue={patient.emergencyContact}
+                                />
+                                <FormField
+                                  label="Emergency phone"
+                                  name="emergencyPhone"
+                                  defaultValue={patient.emergencyPhone}
+                                />
+                                <FormField label="Last visit" name="lastVisit" defaultValue={patient.lastVisitValue} type="date" />
+
+                                <label className="flex flex-col gap-2 text-sm text-slate-600">
+                                  <span className="font-medium text-slate-700">Notes</span>
+                                  <textarea
+                                    className="min-h-24 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+                                    defaultValue={patient.notes ?? ''}
+                                    name="notes"
+                                  />
+                                </label>
+
+                                <button
+                                  className="inline-flex items-center justify-center rounded-lg bg-sky-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
+                                  type="submit"
+                                >
+                                  Save changes
+                                </button>
+                              </form>
+                            </details>
+
+                            <form action={deletePatientAction}>
+                              <input name="id" type="hidden" value={patient.id} />
+                              <button
+                                className="inline-flex items-center justify-center rounded-lg border border-rose-200 px-3 py-2 text-sm font-medium text-rose-600 transition hover:bg-rose-50"
+                                type="submit"
+                              >
+                                Delete patient
+                              </button>
+                            </form>
+                          </div>
+                        ) : (
+                          <span className="text-sm text-slate-400">Read only</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
     </DashboardShell>
   );
 }
