@@ -59,7 +59,8 @@ export function LoginForm() {
         }
 
       if (result?.ok) {
-        router.replace(result.url ?? callbackUrl);
+        const redirectTarget = getCallbackPath(result?.url ?? callbackUrl);
+        router.replace(redirectTarget);
         return;
       }
 
