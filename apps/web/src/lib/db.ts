@@ -1,5 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 
+const databaseUrl = process.env.DATABASE_URL?.trim();
+
+if (databaseUrl && databaseUrl !== process.env.DATABASE_URL) {
+  process.env.DATABASE_URL = databaseUrl;
+}
+
 declare global {
   var prisma: PrismaClient | undefined;
 }

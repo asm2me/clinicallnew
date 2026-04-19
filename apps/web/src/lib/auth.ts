@@ -3,6 +3,23 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
 import { db } from '@/lib/db';
 
+function normalizeEnv(name: string) {
+  const value = process.env[name];
+
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+
+    if (trimmed !== value) {
+      process.env[name] = trimmed;
+    }
+  }
+}
+
+normalizeEnv('NEXTAUTH_SECRET');
+normalizeEnv('AUTH_SECRET');
+normalizeEnv('NEXTAUTH_URL');
+normalizeEnv('DATABASE_URL');
+
 const isProd = process.env.NODE_ENV === 'production';
 const authSecret = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET;
 
