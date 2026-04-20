@@ -12,6 +12,7 @@ import { db } from '../../../lib/db';
 const SETTINGS_PATH = '/dashboard/settings';
 const ADMIN_ROLES = ['SUPER_ADMIN', 'TENANT_ADMIN'] as const;
 const USER_ROLES = ['SUPER_ADMIN', 'TENANT_ADMIN', 'DOCTOR', 'STAFF', 'PATIENT'] as const;
+const TENANT_STATUSES = ['ACTIVE', 'TRIALING', 'SUSPENDED', 'ARCHIVED'] as const;
 
 const profileSchema = z.object({
   name: z.string().trim().min(1, 'Name is required').max(120, 'Name is too long'),
@@ -45,6 +46,28 @@ const updateUserSchema = z.object({
 const deleteUserSchema = z.object({
   userId: z.string().trim().min(1, 'User id is required'),
   confirmationText: z.string().trim().min(1, 'Type the user email to confirm deletion.'),
+});
+
+const createTenantSchema = z.object({
+  name: z.string().trim().min(1, 'Tenant name is required').max(120, 'Tenant name is too long'),
+  slug: z.string().trim().min(1, 'Tenant slug is required').max(120, 'Tenant slug is too long'),
+  status: z.enum(TENANT_STATUSES),
+  websiteName: z.string().trim().max(120, 'Website name is too long').optional(),
+  supportEmail: z
+    .string()
+    .trim()
+    .email('A valid support email address is required')
+    .optional()
+    .or(z.literal('')),
+  supportPhone: z.string().trim().max(50, 'Support phone is too long').optional(),
+  timezone: z.string().trim().min(1, 'Timezone is required').max(100, 'Timezone is too long'),
+  locale: z.string().trim().min(1, 'Locale is required').max(20, 'Locale is too long'),
+  subscriptionPlan: z.string().trim().max(50, 'Subscription plan is too long').optional(),
+  subscriptionStatus: z.string().trim().max(50, 'Subscription status is too long').optional(),
+});
+
+const updateTenantSchema = createTenantSchema.extend({
+  tenantId: z.string().trim().min(1, 'Tenant id is required'),
 });
 
 type Actor = {
@@ -115,6 +138,12 @@ async function getActor(): Promise<Actor> {
 function ensureAdmin(actor: Actor) {
   if (!ADMIN_ROLES.includes(actor.role as (typeof ADMIN_ROLES)[number])) {
     redirectWithError('You are not allowed to manage users.');
+  }
+}
+
+function ensureSuperAdmin(actor: Actor) {
+  if (actor.role !== 'SUPER_ADMIN') {
+    redirectWithError('Only super admins can manage tenants.');
   }
 }
 
@@ -213,6 +242,109 @@ async function getManagedUser(actor: Actor, userId: string) {
   }
 
   return user;
+}
+
+export async function createTenantAction(formData: FormData): Promise<void> {
+  const actor = await getActor();
+  ensureSuperAdmin(actor);
+
+  const parsed = createTenantSchema.safeParse({
+    name: getString(formData, 'name'),
+    slug: getString(formData, 'slug').toLowerCase(),
+    status: getString(formData, 'status'),
+    websiteName: toOptional(getString(formData, 'websiteName')),
+    supportEmail: toOptional(getString(formData, 'supportEmail')),
+    supportPhone: toOptional(getString(formData, 'supportPhone')),
+    timezone: getString(formData, 'timezone') || 'UTC',
+    locale: getString(formData, 'locale') || 'en',
+    subscriptionPlan: toOptional(getString(formData, 'subscriptionPlan')),
+    subscriptionStatus: toOptional(getString(formData, 'subscriptionStatus')),
+  });
+
+  if (!parsed.success) {
+    redirectWithError(parsed.error.issues[0]?.message ?? 'Tenant details are invalid.');
+  }
+
+  try {
+    await db.tenant.create({
+      data: {
+        name: parsed.data.name,
+        slug: parsed.data.slug,
+        status: parsed.data.status,
+        websiteName: parsed.data.websiteName ?? null,
+        supportEmail: parsed.data.supportEmail ?? null,
+        supportPhone: parsed.data.supportPhone ?? null,
+        timezone: parsed.data.timezone,
+        locale: parsed.data.locale,
+        subscriptionPlan: parsed.data.subscriptionPlan ?? null,
+        subscriptionStatus: parsed.data.subscriptionStatus ?? null,
+        isActive: parsed.data.status !== 'ARCHIVED',
+      } as never,
+    });
+  } catch (error) {
+    console.error('createTenantAction failed', error);
+    redirectWithError('The tenant could not be created. Check for duplicate tenant names or slugs.');
+  }
+
+  revalidatePath(SETTINGS_PATH);
+  redirectWithMessage('Tenant created successfully.');
+}
+
+export async function updateTenantAction(formData: FormData): Promise<void> {
+  const actor = await getActor();
+  ensureSuperAdmin(actor);
+
+  const parsed = updateTenantSchema.safeParse({
+    tenantId: getString(formData, 'tenantId'),
+    name: getString(formData, 'name'),
+    slug: getString(formData, 'slug').toLowerCase(),
+    status: getString(formData, 'status'),
+    websiteName: toOptional(getString(formData, 'websiteName')),
+    supportEmail: toOptional(getString(formData, 'supportEmail')),
+    supportPhone: toOptional(getString(formData, 'supportPhone')),
+    timezone: getString(formData, 'timezone') || 'UTC',
+    locale: getString(formData, 'locale') || 'en',
+    subscriptionPlan: toOptional(getString(formData, 'subscriptionPlan')),
+    subscriptionStatus: toOptional(getString(formData, 'subscriptionStatus')),
+  });
+
+  if (!parsed.success) {
+    redirectWithError(parsed.error.issues[0]?.message ?? 'Tenant details are invalid.');
+  }
+
+  const existingTenant = await db.tenant.findUnique({
+    where: { id: parsed.data.tenantId },
+    select: { id: true },
+  });
+
+  if (!existingTenant) {
+    redirectWithError('The selected tenant was not found.');
+  }
+
+  try {
+    await db.tenant.update({
+      where: { id: parsed.data.tenantId },
+      data: {
+        name: parsed.data.name,
+        slug: parsed.data.slug,
+        status: parsed.data.status,
+        websiteName: parsed.data.websiteName ?? null,
+        supportEmail: parsed.data.supportEmail ?? null,
+        supportPhone: parsed.data.supportPhone ?? null,
+        timezone: parsed.data.timezone,
+        locale: parsed.data.locale,
+        subscriptionPlan: parsed.data.subscriptionPlan ?? null,
+        subscriptionStatus: parsed.data.subscriptionStatus ?? null,
+        isActive: parsed.data.status !== 'ARCHIVED',
+      } as never,
+    });
+  } catch (error) {
+    console.error('updateTenantAction failed', error);
+    redirectWithError('The tenant could not be updated. Check for duplicate tenant names or slugs.');
+  }
+
+  revalidatePath(SETTINGS_PATH);
+  redirectWithMessage('Tenant updated successfully.');
 }
 
 export async function updateProfileAction(formData: FormData): Promise<void> {

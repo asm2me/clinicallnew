@@ -28,18 +28,24 @@ export async function getSettingsData(userId: string) {
 
   const canManageUsers = ADMIN_ROLES.includes(role as (typeof ADMIN_ROLES)[number]);
 
+  const scopedTenantId = (currentUser as { tenantId?: string | null }).tenantId ?? null;
+
   const userWhere =
     role === 'SUPER_ADMIN'
       ? {}
       : role === 'TENANT_ADMIN'
-        ? { tenantId: (currentUser as { tenantId?: string | null }).tenantId ?? undefined }
+        ? scopedTenantId
+          ? { tenantId: scopedTenantId }
+          : { id: '__forbidden__' }
         : undefined;
 
   const clinicWhere =
     role === 'SUPER_ADMIN'
       ? {}
       : role === 'TENANT_ADMIN'
-        ? { tenantId: (currentUser as { tenantId?: string | null }).tenantId ?? undefined }
+        ? scopedTenantId
+          ? { tenantId: scopedTenantId }
+          : { id: '__forbidden__' }
         : undefined;
 
   const [users, clinics, tenants] = await Promise.all([
@@ -68,6 +74,16 @@ export async function getSettingsData(userId: string) {
       : Promise.resolve([]),
     role === 'SUPER_ADMIN'
       ? db.tenant.findMany({
+          include: {
+            _count: {
+              select: {
+                clinics: true,
+                users: true,
+                patients: true,
+                appointments: true,
+              },
+            },
+          },
           orderBy: [{ name: 'asc' }],
         })
       : Promise.resolve([]),
@@ -81,7 +97,7 @@ export async function getSettingsData(userId: string) {
       phone: (currentUser as { phone?: string | null }).phone ?? '',
       title: (currentUser as { title?: string | null }).title ?? '',
       role,
-      tenantId: (currentUser as { tenantId?: string | null }).tenantId ?? null,
+      tenantId: scopedTenantId,
       tenantName:
         (currentUser as { tenant?: { name?: string | null } | null }).tenant?.name ??
         (currentUser as {
@@ -140,6 +156,20 @@ export async function getSettingsData(userId: string) {
             id: tenant.id,
             name: tenant.name,
             slug: (tenant as { slug?: string | null }).slug ?? '',
+            status: (tenant as { status?: string | null }).status ?? 'TRIALING',
+            websiteName: (tenant as { websiteName?: string | null }).websiteName ?? '',
+            supportEmail: (tenant as { supportEmail?: string | null }).supportEmail ?? '',
+            supportPhone: (tenant as { supportPhone?: string | null }).supportPhone ?? '',
+            timezone: (tenant as { timezone?: string | null }).timezone ?? 'UTC',
+            locale: (tenant as { locale?: string | null }).locale ?? 'en',
+            subscriptionPlan: (tenant as { subscriptionPlan?: string | null }).subscriptionPlan ?? '',
+            subscriptionStatus:
+              (tenant as { subscriptionStatus?: string | null }).subscriptionStatus ?? '',
+            isActive: (tenant as { isActive?: boolean | null }).isActive ?? true,
+            clinicCount: tenant._count.clinics,
+            userCount: tenant._count.users,
+            patientCount: tenant._count.patients,
+            appointmentCount: tenant._count.appointments,
           }))
         : [],
   };

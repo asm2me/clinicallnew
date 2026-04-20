@@ -17,9 +17,14 @@ export async function getClinicsData(userId: string) {
   if (!user) throw new Error('User not found');
 
   const scopedTenantId =
-    user.role === 'SUPER_ADMIN' ? undefined : user.tenantId ?? user.clinic?.tenantId ?? undefined;
+    user.role === 'SUPER_ADMIN' ? undefined : user.tenantId ?? user.clinic?.tenantId ?? null;
 
-  const where: Prisma.ClinicWhereInput = scopedTenantId ? { tenantId: scopedTenantId } : {};
+  const where: Prisma.ClinicWhereInput =
+    user.role === 'SUPER_ADMIN'
+      ? {}
+      : scopedTenantId
+        ? { tenantId: scopedTenantId }
+        : { id: '__forbidden__' };
 
   const [clinics, tenantOptions] = await Promise.all([
     db.clinic.findMany({

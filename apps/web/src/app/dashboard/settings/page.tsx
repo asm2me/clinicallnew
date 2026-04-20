@@ -5,14 +5,17 @@ import { DashboardShell } from '../../../components/dashboard/shell';
 import { authOptions } from '../../../lib/auth';
 import { getSettingsData } from '../../../lib/queries/settings';
 import {
+  createTenantAction,
   createUserAction,
   deleteUserAction,
   updateProfileAction,
+  updateTenantAction,
   updateUserAction,
 } from './actions';
 
 const ALL_ROLES = ['SUPER_ADMIN', 'TENANT_ADMIN', 'DOCTOR', 'STAFF', 'PATIENT'] as const;
 const TENANT_ADMIN_ROLES = ['TENANT_ADMIN', 'DOCTOR', 'STAFF', 'PATIENT'] as const;
+const TENANT_STATUSES = ['ACTIVE', 'TRIALING', 'SUSPENDED', 'ARCHIVED'] as const;
 
 type SettingsPageProps = {
   searchParams?: Record<string, string | string[] | undefined>;
@@ -172,6 +175,260 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
             <p className="mt-2 text-sm text-slate-500">{data.preferences.timezone}</p>
           </div>
         </section>
+
+        {data.profile.role === 'SUPER_ADMIN' ? (
+          <section className="space-y-6">
+            <div className="odoo-panel space-y-4">
+              <div>
+                <h2 className="text-lg font-semibold text-slate-900">Create tenant</h2>
+                <p className="text-sm text-slate-500">
+                  Create a new tenant workspace for a clinic organization.
+                </p>
+              </div>
+
+              <form action={createTenantAction} className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                <label className="space-y-2">
+                  <span className="text-sm font-medium text-slate-700">Tenant name</span>
+                  <input className={inputClassName()} name="name" required type="text" />
+                </label>
+
+                <label className="space-y-2">
+                  <span className="text-sm font-medium text-slate-700">Slug</span>
+                  <input className={inputClassName()} name="slug" required type="text" />
+                </label>
+
+                <label className="space-y-2">
+                  <span className="text-sm font-medium text-slate-700">Status</span>
+                  <select className={selectClassName()} defaultValue="TRIALING" name="status" required>
+                    {TENANT_STATUSES.map((status) => (
+                      <option key={status} value={status}>
+                        {status}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="space-y-2">
+                  <span className="text-sm font-medium text-slate-700">Website name</span>
+                  <input className={inputClassName()} name="websiteName" type="text" />
+                </label>
+
+                <label className="space-y-2">
+                  <span className="text-sm font-medium text-slate-700">Support email</span>
+                  <input className={inputClassName()} name="supportEmail" type="email" />
+                </label>
+
+                <label className="space-y-2">
+                  <span className="text-sm font-medium text-slate-700">Support phone</span>
+                  <input className={inputClassName()} name="supportPhone" type="tel" />
+                </label>
+
+                <label className="space-y-2">
+                  <span className="text-sm font-medium text-slate-700">Timezone</span>
+                  <input
+                    className={inputClassName()}
+                    defaultValue="UTC"
+                    name="timezone"
+                    required
+                    type="text"
+                  />
+                </label>
+
+                <label className="space-y-2">
+                  <span className="text-sm font-medium text-slate-700">Locale</span>
+                  <input
+                    className={inputClassName()}
+                    defaultValue="en"
+                    name="locale"
+                    required
+                    type="text"
+                  />
+                </label>
+
+                <label className="space-y-2">
+                  <span className="text-sm font-medium text-slate-700">Subscription plan</span>
+                  <input className={inputClassName()} name="subscriptionPlan" type="text" />
+                </label>
+
+                <label className="space-y-2 md:col-span-2 xl:col-span-3">
+                  <span className="text-sm font-medium text-slate-700">Subscription status</span>
+                  <input className={inputClassName()} name="subscriptionStatus" type="text" />
+                </label>
+
+                <div className="md:col-span-2 xl:col-span-3 flex justify-end">
+                  <button className={buttonClassName()} type="submit">
+                    Create tenant
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <section className="odoo-panel space-y-4">
+              <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold text-slate-900">Tenant management</h2>
+                  <p className="text-sm text-slate-500">
+                    Review tenant workspaces, usage, and subscription metadata.
+                  </p>
+                </div>
+
+                <span className="text-sm text-slate-500">
+                  {data.tenants.length} tenant{data.tenants.length === 1 ? '' : 's'} configured
+                </span>
+              </div>
+
+              <div className="grid gap-4">
+                {data.tenants.map((tenant) => (
+                  <details key={tenant.id} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                    <summary className="cursor-pointer list-none">
+                      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                        <div>
+                          <div className="font-medium text-slate-900">{tenant.name}</div>
+                          <div className="text-sm text-slate-500">
+                            {tenant.slug} · {tenant.status}
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2 text-xs text-slate-500">
+                          <span className="odoo-badge">{tenant.clinicCount} clinics</span>
+                          <span className="odoo-badge">{tenant.userCount} users</span>
+                          <span className="odoo-badge">{tenant.patientCount} patients</span>
+                          <span className="odoo-badge">{tenant.appointmentCount} appointments</span>
+                        </div>
+                      </div>
+                    </summary>
+
+                    <form action={updateTenantAction} className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                      <input name="tenantId" type="hidden" value={tenant.id} />
+
+                      <label className="space-y-2">
+                        <span className="text-sm font-medium text-slate-700">Tenant name</span>
+                        <input
+                          className={inputClassName()}
+                          defaultValue={tenant.name}
+                          name="name"
+                          required
+                          type="text"
+                        />
+                      </label>
+
+                      <label className="space-y-2">
+                        <span className="text-sm font-medium text-slate-700">Slug</span>
+                        <input
+                          className={inputClassName()}
+                          defaultValue={tenant.slug}
+                          name="slug"
+                          required
+                          type="text"
+                        />
+                      </label>
+
+                      <label className="space-y-2">
+                        <span className="text-sm font-medium text-slate-700">Status</span>
+                        <select
+                          className={selectClassName()}
+                          defaultValue={tenant.status}
+                          name="status"
+                          required
+                        >
+                          {TENANT_STATUSES.map((status) => (
+                            <option key={status} value={status}>
+                              {status}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+
+                      <label className="space-y-2">
+                        <span className="text-sm font-medium text-slate-700">Website name</span>
+                        <input
+                          className={inputClassName()}
+                          defaultValue={tenant.websiteName}
+                          name="websiteName"
+                          type="text"
+                        />
+                      </label>
+
+                      <label className="space-y-2">
+                        <span className="text-sm font-medium text-slate-700">Support email</span>
+                        <input
+                          className={inputClassName()}
+                          defaultValue={tenant.supportEmail}
+                          name="supportEmail"
+                          type="email"
+                        />
+                      </label>
+
+                      <label className="space-y-2">
+                        <span className="text-sm font-medium text-slate-700">Support phone</span>
+                        <input
+                          className={inputClassName()}
+                          defaultValue={tenant.supportPhone}
+                          name="supportPhone"
+                          type="tel"
+                        />
+                      </label>
+
+                      <label className="space-y-2">
+                        <span className="text-sm font-medium text-slate-700">Timezone</span>
+                        <input
+                          className={inputClassName()}
+                          defaultValue={tenant.timezone}
+                          name="timezone"
+                          required
+                          type="text"
+                        />
+                      </label>
+
+                      <label className="space-y-2">
+                        <span className="text-sm font-medium text-slate-700">Locale</span>
+                        <input
+                          className={inputClassName()}
+                          defaultValue={tenant.locale}
+                          name="locale"
+                          required
+                          type="text"
+                        />
+                      </label>
+
+                      <label className="space-y-2">
+                        <span className="text-sm font-medium text-slate-700">Subscription plan</span>
+                        <input
+                          className={inputClassName()}
+                          defaultValue={tenant.subscriptionPlan}
+                          name="subscriptionPlan"
+                          type="text"
+                        />
+                      </label>
+
+                      <label className="space-y-2 md:col-span-2 xl:col-span-3">
+                        <span className="text-sm font-medium text-slate-700">Subscription status</span>
+                        <input
+                          className={inputClassName()}
+                          defaultValue={tenant.subscriptionStatus}
+                          name="subscriptionStatus"
+                          type="text"
+                        />
+                      </label>
+
+                      <div className="md:col-span-2 xl:col-span-3 flex justify-end">
+                        <button className={buttonClassName('secondary')} type="submit">
+                          Save tenant changes
+                        </button>
+                      </div>
+                    </form>
+                  </details>
+                ))}
+
+                {data.tenants.length === 0 ? (
+                  <div className="rounded-lg border border-dashed border-slate-300 px-4 py-6 text-center text-sm text-slate-500">
+                    No tenants have been created yet.
+                  </div>
+                ) : null}
+              </div>
+            </section>
+          </section>
+        ) : null}
 
         {data.canManageUsers ? (
           <section className="space-y-6">

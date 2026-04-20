@@ -1,0 +1,22 @@
+{
+    "timestamp":  "2026-04-20T00:07:52.484Z",
+    "nodeEnv":  "development",
+    "env":  {
+                "hasDatabaseUrl":  true,
+                "databaseHost":  "aws-1-eu-north-1.pooler.supabase.com",
+                "hasAuthSecret":  true,
+                "nextauthUrl":  "http://localhost:3000",
+                "databasePort":  "6543"
+            },
+    "database":  {
+                     "status":  "connected",
+                     "userCount":  5,
+                     "error":  null,
+                     "testUser":  {
+                                      "id":  "cmo67frec000f953oq7xyyl8k",
+                                      "email":  "superadmin@clinicall.demo",
+                                      "role":  "SUPER_ADMIN",
+                                      "isActive":  true
+                                  }
+                 }
+}
