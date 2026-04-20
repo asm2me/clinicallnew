@@ -48,7 +48,73 @@ const deleteUserSchema = z.object({
   confirmationText: z.string().trim().min(1, 'Type the user email to confirm deletion.'),
 });
 
-const createTenantSchema = z.object({
+const createTenantSchema = z
+  .object({
+    name: z.string().trim().min(1, 'Tenant name is required').max(120, 'Tenant name is too long'),
+    slug: z.string().trim().min(1, 'Tenant slug is required').max(120, 'Tenant slug is too long'),
+    status: z.enum(TENANT_STATUSES),
+    websiteName: z.string().trim().max(120, 'Website name is too long').optional(),
+    supportEmail: z
+      .string()
+      .trim()
+      .email('A valid support email address is required')
+      .optional()
+      .or(z.literal('')),
+    supportPhone: z.string().trim().max(50, 'Support phone is too long').optional(),
+    timezone: z.string().trim().min(1, 'Timezone is required').max(100, 'Timezone is too long'),
+    locale: z.string().trim().min(1, 'Locale is required').max(20, 'Locale is too long'),
+    subscriptionPlan: z.string().trim().max(50, 'Subscription plan is too long').optional(),
+    subscriptionStatus: z.string().trim().max(50, 'Subscription status is too long').optional(),
+    tenantAdminName: z.string().trim().max(120, 'Tenant admin name is too long').optional(),
+    tenantAdminEmail: z
+      .string()
+      .trim()
+      .email('A valid tenant admin email address is required')
+      .optional(),
+    tenantAdminPassword: z.string().max(200, 'Tenant admin password is too long').optional(),
+  })
+  .superRefine((value, ctx) => {
+    const hasAdminName = Boolean(value.tenantAdminName);
+    const hasAdminEmail = Boolean(value.tenantAdminEmail);
+    const hasAdminPassword = Boolean(value.tenantAdminPassword);
+
+    if (hasAdminName || hasAdminEmail || hasAdminPassword) {
+      if (!hasAdminName) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Tenant admin name is required when creating an initial tenant admin.',
+          path: ['tenantAdminName'],
+        });
+      }
+
+      if (!hasAdminEmail) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Tenant admin email is required when creating an initial tenant admin.',
+          path: ['tenantAdminEmail'],
+        });
+      }
+
+      if (!hasAdminPassword) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Tenant admin password is required when creating an initial tenant admin.',
+          path: ['tenantAdminPassword'],
+        });
+      }
+
+      if (value.tenantAdminPassword && value.tenantAdminPassword.length < 6) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Tenant admin password must be at least 6 characters.',
+          path: ['tenantAdminPassword'],
+        });
+      }
+    }
+  });
+
+const updateTenantSchema = z.object({
+  tenantId: z.string().trim().min(1, 'Tenant id is required'),
   name: z.string().trim().min(1, 'Tenant name is required').max(120, 'Tenant name is too long'),
   slug: z.string().trim().min(1, 'Tenant slug is required').max(120, 'Tenant slug is too long'),
   status: z.enum(TENANT_STATUSES),
@@ -64,10 +130,6 @@ const createTenantSchema = z.object({
   locale: z.string().trim().min(1, 'Locale is required').max(20, 'Locale is too long'),
   subscriptionPlan: z.string().trim().max(50, 'Subscription plan is too long').optional(),
   subscriptionStatus: z.string().trim().max(50, 'Subscription status is too long').optional(),
-});
-
-const updateTenantSchema = createTenantSchema.extend({
-  tenantId: z.string().trim().min(1, 'Tenant id is required'),
 });
 
 type Actor = {
@@ -259,6 +321,9 @@ export async function createTenantAction(formData: FormData): Promise<void> {
     locale: getString(formData, 'locale') || 'en',
     subscriptionPlan: toOptional(getString(formData, 'subscriptionPlan')),
     subscriptionStatus: toOptional(getString(formData, 'subscriptionStatus')),
+    tenantAdminName: toOptional(getString(formData, 'tenantAdminName')),
+    tenantAdminEmail: toOptional(getString(formData, 'tenantAdminEmail').toLowerCase()),
+    tenantAdminPassword: toOptional(getString(formData, 'tenantAdminPassword')),
   });
 
   if (!parsed.success) {
@@ -266,28 +331,56 @@ export async function createTenantAction(formData: FormData): Promise<void> {
   }
 
   try {
-    await db.tenant.create({
-      data: {
-        name: parsed.data.name,
-        slug: parsed.data.slug,
-        status: parsed.data.status,
-        websiteName: parsed.data.websiteName ?? null,
-        supportEmail: parsed.data.supportEmail ?? null,
-        supportPhone: parsed.data.supportPhone ?? null,
-        timezone: parsed.data.timezone,
-        locale: parsed.data.locale,
-        subscriptionPlan: parsed.data.subscriptionPlan ?? null,
-        subscriptionStatus: parsed.data.subscriptionStatus ?? null,
-        isActive: parsed.data.status !== 'ARCHIVED',
-      } as never,
+    await db.$transaction(async (tx) => {
+      const tenant = await tx.tenant.create({
+        data: {
+          name: parsed.data.name,
+          slug: parsed.data.slug,
+          status: parsed.data.status,
+          websiteName: parsed.data.websiteName ?? null,
+          supportEmail: parsed.data.supportEmail ?? null,
+          supportPhone: parsed.data.supportPhone ?? null,
+          timezone: parsed.data.timezone,
+          locale: parsed.data.locale,
+          subscriptionPlan: parsed.data.subscriptionPlan ?? null,
+          subscriptionStatus: parsed.data.subscriptionStatus ?? null,
+          isActive: parsed.data.status !== 'ARCHIVED',
+        } as never,
+      });
+
+      if (
+        parsed.data.tenantAdminName &&
+        parsed.data.tenantAdminEmail &&
+        parsed.data.tenantAdminPassword
+      ) {
+        await tx.user.create({
+          data: {
+            name: parsed.data.tenantAdminName,
+            email: parsed.data.tenantAdminEmail,
+            hashedPassword: await hash(parsed.data.tenantAdminPassword, 10),
+            role: 'TENANT_ADMIN',
+            tenantId: tenant.id,
+            clinicId: null,
+            title: 'Tenant Administrator',
+            isActive: true,
+            emailVerifiedAt: new Date(),
+          } as never,
+        });
+      }
     });
   } catch (error) {
     console.error('createTenantAction failed', error);
-    redirectWithError('The tenant could not be created. Check for duplicate tenant names or slugs.');
+    redirectWithError(
+      'The tenant could not be created. Check for duplicate tenant names, slugs, or tenant admin email addresses.',
+    );
   }
 
   revalidatePath(SETTINGS_PATH);
-  redirectWithMessage('Tenant created successfully.');
+  redirectWithMessage(
+    parsed.data.tenantAdminEmail
+      ? 'Tenant and initial tenant admin created successfully.'
+      : 'Tenant created successfully.',
+  );
 }
 
 export async function updateTenantAction(formData: FormData): Promise<void> {

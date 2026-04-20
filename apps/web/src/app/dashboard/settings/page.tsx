@@ -255,6 +255,37 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                   <input className={inputClassName()} name="subscriptionStatus" type="text" />
                 </label>
 
+                <div className="md:col-span-2 xl:col-span-3 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                  <div className="mb-4">
+                    <h3 className="text-sm font-semibold text-slate-900">Initial tenant admin (optional)</h3>
+                    <p className="text-sm text-slate-500">
+                      Create the first tenant administrator together with the tenant workspace.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    <label className="space-y-2">
+                      <span className="text-sm font-medium text-slate-700">Admin name</span>
+                      <input className={inputClassName()} name="tenantAdminName" type="text" />
+                    </label>
+
+                    <label className="space-y-2">
+                      <span className="text-sm font-medium text-slate-700">Admin email</span>
+                      <input className={inputClassName()} name="tenantAdminEmail" type="email" />
+                    </label>
+
+                    <label className="space-y-2">
+                      <span className="text-sm font-medium text-slate-700">Admin password</span>
+                      <input
+                        className={inputClassName()}
+                        minLength={6}
+                        name="tenantAdminPassword"
+                        type="password"
+                      />
+                    </label>
+                  </div>
+                </div>
+
                 <div className="md:col-span-2 xl:col-span-3 flex justify-end">
                   <button className={buttonClassName()} type="submit">
                     Create tenant
