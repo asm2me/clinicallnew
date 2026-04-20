@@ -176,130 +176,134 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
           </div>
         </section>
 
-        {data.profile.role === 'SUPER_ADMIN' ? (
+        {data.profile.role === 'SUPER_ADMIN' || data.profile.role === 'TENANT_ADMIN' ? (
           <section className="space-y-6">
-            <div className="odoo-panel space-y-4">
-              <div>
-                <h2 className="text-lg font-semibold text-slate-900">Create tenant</h2>
-                <p className="text-sm text-slate-500">
-                  Create a new tenant workspace for a clinic organization.
-                </p>
+            {data.profile.role === 'SUPER_ADMIN' ? (
+              <div className="odoo-panel space-y-4">
+                <div>
+                  <h2 className="text-lg font-semibold text-slate-900">Create tenant</h2>
+                  <p className="text-sm text-slate-500">
+                    Create a new tenant workspace for a clinic organization.
+                  </p>
+                </div>
+
+                <form action={createTenantAction} className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  <label className="space-y-2">
+                    <span className="text-sm font-medium text-slate-700">Tenant name</span>
+                    <input className={inputClassName()} name="name" required type="text" />
+                  </label>
+
+                  <label className="space-y-2">
+                    <span className="text-sm font-medium text-slate-700">Slug</span>
+                    <input className={inputClassName()} name="slug" required type="text" />
+                  </label>
+
+                  <label className="space-y-2">
+                    <span className="text-sm font-medium text-slate-700">Status</span>
+                    <select className={selectClassName()} defaultValue="TRIALING" name="status" required>
+                      {TENANT_STATUSES.map((status) => (
+                        <option key={status} value={status}>
+                          {status}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label className="space-y-2">
+                    <span className="text-sm font-medium text-slate-700">Website name</span>
+                    <input className={inputClassName()} name="websiteName" type="text" />
+                  </label>
+
+                  <label className="space-y-2">
+                    <span className="text-sm font-medium text-slate-700">Support email</span>
+                    <input className={inputClassName()} name="supportEmail" type="email" />
+                  </label>
+
+                  <label className="space-y-2">
+                    <span className="text-sm font-medium text-slate-700">Support phone</span>
+                    <input className={inputClassName()} name="supportPhone" type="tel" />
+                  </label>
+
+                  <label className="space-y-2">
+                    <span className="text-sm font-medium text-slate-700">Timezone</span>
+                    <input
+                      className={inputClassName()}
+                      defaultValue="UTC"
+                      name="timezone"
+                      required
+                      type="text"
+                    />
+                  </label>
+
+                  <label className="space-y-2">
+                    <span className="text-sm font-medium text-slate-700">Locale</span>
+                    <input
+                      className={inputClassName()}
+                      defaultValue="en"
+                      name="locale"
+                      required
+                      type="text"
+                    />
+                  </label>
+
+                  <label className="space-y-2">
+                    <span className="text-sm font-medium text-slate-700">Subscription plan</span>
+                    <input className={inputClassName()} name="subscriptionPlan" type="text" />
+                  </label>
+
+                  <label className="space-y-2 md:col-span-2 xl:col-span-3">
+                    <span className="text-sm font-medium text-slate-700">Subscription status</span>
+                    <input className={inputClassName()} name="subscriptionStatus" type="text" />
+                  </label>
+
+                  <div className="md:col-span-2 xl:col-span-3 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                    <div className="mb-4">
+                      <h3 className="text-sm font-semibold text-slate-900">Initial tenant admin (optional)</h3>
+                      <p className="text-sm text-slate-500">
+                        Create the first tenant administrator together with the tenant workspace.
+                      </p>
+                    </div>
+
+                    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                      <label className="space-y-2">
+                        <span className="text-sm font-medium text-slate-700">Admin name</span>
+                        <input className={inputClassName()} name="tenantAdminName" type="text" />
+                      </label>
+
+                      <label className="space-y-2">
+                        <span className="text-sm font-medium text-slate-700">Admin email</span>
+                        <input className={inputClassName()} name="tenantAdminEmail" type="email" />
+                      </label>
+
+                      <label className="space-y-2">
+                        <span className="text-sm font-medium text-slate-700">Admin password</span>
+                        <input
+                          className={inputClassName()}
+                          minLength={6}
+                          name="tenantAdminPassword"
+                          type="password"
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="md:col-span-2 xl:col-span-3 flex justify-end">
+                    <button className={buttonClassName()} type="submit">
+                      Create tenant
+                    </button>
+                  </div>
+                </form>
               </div>
-
-              <form action={createTenantAction} className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                <label className="space-y-2">
-                  <span className="text-sm font-medium text-slate-700">Tenant name</span>
-                  <input className={inputClassName()} name="name" required type="text" />
-                </label>
-
-                <label className="space-y-2">
-                  <span className="text-sm font-medium text-slate-700">Slug</span>
-                  <input className={inputClassName()} name="slug" required type="text" />
-                </label>
-
-                <label className="space-y-2">
-                  <span className="text-sm font-medium text-slate-700">Status</span>
-                  <select className={selectClassName()} defaultValue="TRIALING" name="status" required>
-                    {TENANT_STATUSES.map((status) => (
-                      <option key={status} value={status}>
-                        {status}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="space-y-2">
-                  <span className="text-sm font-medium text-slate-700">Website name</span>
-                  <input className={inputClassName()} name="websiteName" type="text" />
-                </label>
-
-                <label className="space-y-2">
-                  <span className="text-sm font-medium text-slate-700">Support email</span>
-                  <input className={inputClassName()} name="supportEmail" type="email" />
-                </label>
-
-                <label className="space-y-2">
-                  <span className="text-sm font-medium text-slate-700">Support phone</span>
-                  <input className={inputClassName()} name="supportPhone" type="tel" />
-                </label>
-
-                <label className="space-y-2">
-                  <span className="text-sm font-medium text-slate-700">Timezone</span>
-                  <input
-                    className={inputClassName()}
-                    defaultValue="UTC"
-                    name="timezone"
-                    required
-                    type="text"
-                  />
-                </label>
-
-                <label className="space-y-2">
-                  <span className="text-sm font-medium text-slate-700">Locale</span>
-                  <input
-                    className={inputClassName()}
-                    defaultValue="en"
-                    name="locale"
-                    required
-                    type="text"
-                  />
-                </label>
-
-                <label className="space-y-2">
-                  <span className="text-sm font-medium text-slate-700">Subscription plan</span>
-                  <input className={inputClassName()} name="subscriptionPlan" type="text" />
-                </label>
-
-                <label className="space-y-2 md:col-span-2 xl:col-span-3">
-                  <span className="text-sm font-medium text-slate-700">Subscription status</span>
-                  <input className={inputClassName()} name="subscriptionStatus" type="text" />
-                </label>
-
-                <div className="md:col-span-2 xl:col-span-3 rounded-lg border border-slate-200 bg-slate-50 p-4">
-                  <div className="mb-4">
-                    <h3 className="text-sm font-semibold text-slate-900">Initial tenant admin (optional)</h3>
-                    <p className="text-sm text-slate-500">
-                      Create the first tenant administrator together with the tenant workspace.
-                    </p>
-                  </div>
-
-                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                    <label className="space-y-2">
-                      <span className="text-sm font-medium text-slate-700">Admin name</span>
-                      <input className={inputClassName()} name="tenantAdminName" type="text" />
-                    </label>
-
-                    <label className="space-y-2">
-                      <span className="text-sm font-medium text-slate-700">Admin email</span>
-                      <input className={inputClassName()} name="tenantAdminEmail" type="email" />
-                    </label>
-
-                    <label className="space-y-2">
-                      <span className="text-sm font-medium text-slate-700">Admin password</span>
-                      <input
-                        className={inputClassName()}
-                        minLength={6}
-                        name="tenantAdminPassword"
-                        type="password"
-                      />
-                    </label>
-                  </div>
-                </div>
-
-                <div className="md:col-span-2 xl:col-span-3 flex justify-end">
-                  <button className={buttonClassName()} type="submit">
-                    Create tenant
-                  </button>
-                </div>
-              </form>
-            </div>
+            ) : null}
 
             <section className="odoo-panel space-y-4">
               <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
                 <div>
                   <h2 className="text-lg font-semibold text-slate-900">Tenant management</h2>
                   <p className="text-sm text-slate-500">
-                    Review tenant workspaces, usage, and subscription metadata.
+                    {data.profile.role === 'SUPER_ADMIN'
+                      ? 'Review tenant workspaces, usage, and subscription metadata.'
+                      : 'Review and update your tenant workspace settings.'}
                   </p>
                 </div>
 

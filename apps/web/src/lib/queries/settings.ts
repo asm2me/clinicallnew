@@ -86,7 +86,22 @@ export async function getSettingsData(userId: string) {
           },
           orderBy: [{ name: 'asc' }],
         })
-      : Promise.resolve([]),
+      : role === 'TENANT_ADMIN' && scopedTenantId
+        ? db.tenant.findMany({
+            where: { id: scopedTenantId },
+            include: {
+              _count: {
+                select: {
+                  clinics: true,
+                  users: true,
+                  patients: true,
+                  appointments: true,
+                },
+              },
+            },
+            orderBy: [{ name: 'asc' }],
+          })
+        : Promise.resolve([]),
   ]);
 
   return {
@@ -151,7 +166,7 @@ export async function getSettingsData(userId: string) {
         }))
       : [],
     tenants:
-      role === 'SUPER_ADMIN'
+      role === 'SUPER_ADMIN' || role === 'TENANT_ADMIN'
         ? tenants.map((tenant) => ({
             id: tenant.id,
             name: tenant.name,

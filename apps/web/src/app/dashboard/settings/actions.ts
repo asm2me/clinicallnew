@@ -209,6 +209,12 @@ function ensureSuperAdmin(actor: Actor) {
   }
 }
 
+function ensureTenantManager(actor: Actor) {
+  if (actor.role !== 'SUPER_ADMIN' && actor.role !== 'TENANT_ADMIN') {
+    redirectWithError('You are not allowed to manage tenant settings.');
+  }
+}
+
 async function resolveAssignment(
   actor: Actor,
   role: (typeof USER_ROLES)[number],
@@ -385,7 +391,7 @@ export async function createTenantAction(formData: FormData): Promise<void> {
 
 export async function updateTenantAction(formData: FormData): Promise<void> {
   const actor = await getActor();
-  ensureSuperAdmin(actor);
+  ensureTenantManager(actor);
 
   const parsed = updateTenantSchema.safeParse({
     tenantId: getString(formData, 'tenantId'),
@@ -412,6 +418,16 @@ export async function updateTenantAction(formData: FormData): Promise<void> {
 
   if (!existingTenant) {
     redirectWithError('The selected tenant was not found.');
+  }
+
+  if (actor.role === 'TENANT_ADMIN') {
+    if (!actor.tenantId) {
+      redirectWithError('Your account is missing a tenant assignment.');
+    }
+
+    if (parsed.data.tenantId !== actor.tenantId) {
+      redirectWithError('Tenant admins can only update their own tenant.');
+    }
   }
 
   try {
