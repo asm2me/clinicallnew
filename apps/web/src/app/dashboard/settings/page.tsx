@@ -7,6 +7,7 @@ import { getSettingsData } from '../../../lib/queries/settings';
 import {
   createTenantAction,
   createUserAction,
+  deleteTenantAction,
   deleteUserAction,
   updateProfileAction,
   updateTenantAction,
@@ -333,125 +334,163 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                       </div>
                     </summary>
 
-                    <form action={updateTenantAction} className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                      <input name="tenantId" type="hidden" value={tenant.id} />
+                    <div className="mt-4 space-y-4">
+                      <form action={updateTenantAction} className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                        <input name="tenantId" type="hidden" value={tenant.id} />
 
-                      <label className="space-y-2">
-                        <span className="text-sm font-medium text-slate-700">Tenant name</span>
-                        <input
-                          className={inputClassName()}
-                          defaultValue={tenant.name}
-                          name="name"
-                          required
-                          type="text"
-                        />
-                      </label>
+                        <label className="space-y-2">
+                          <span className="text-sm font-medium text-slate-700">Tenant name</span>
+                          <input
+                            className={inputClassName()}
+                            defaultValue={tenant.name}
+                            name="name"
+                            required
+                            type="text"
+                          />
+                        </label>
 
-                      <label className="space-y-2">
-                        <span className="text-sm font-medium text-slate-700">Slug</span>
-                        <input
-                          className={inputClassName()}
-                          defaultValue={tenant.slug}
-                          name="slug"
-                          required
-                          type="text"
-                        />
-                      </label>
+                        <label className="space-y-2">
+                          <span className="text-sm font-medium text-slate-700">Slug</span>
+                          <input
+                            className={inputClassName()}
+                            defaultValue={tenant.slug}
+                            name="slug"
+                            required
+                            type="text"
+                          />
+                        </label>
 
-                      <label className="space-y-2">
-                        <span className="text-sm font-medium text-slate-700">Status</span>
-                        <select
-                          className={selectClassName()}
-                          defaultValue={tenant.status}
-                          name="status"
-                          required
-                        >
-                          {TENANT_STATUSES.map((status) => (
-                            <option key={status} value={status}>
-                              {status}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
+                        <label className="space-y-2">
+                          <span className="text-sm font-medium text-slate-700">Status</span>
+                          <select
+                            className={selectClassName()}
+                            defaultValue={tenant.status}
+                            name="status"
+                            required
+                          >
+                            {TENANT_STATUSES.map((status) => (
+                              <option key={status} value={status}>
+                                {status}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
 
-                      <label className="space-y-2">
-                        <span className="text-sm font-medium text-slate-700">Website name</span>
-                        <input
-                          className={inputClassName()}
-                          defaultValue={tenant.websiteName}
-                          name="websiteName"
-                          type="text"
-                        />
-                      </label>
+                        <label className="space-y-2">
+                          <span className="text-sm font-medium text-slate-700">Website name</span>
+                          <input
+                            className={inputClassName()}
+                            defaultValue={tenant.websiteName}
+                            name="websiteName"
+                            type="text"
+                          />
+                        </label>
 
-                      <label className="space-y-2">
-                        <span className="text-sm font-medium text-slate-700">Support email</span>
-                        <input
-                          className={inputClassName()}
-                          defaultValue={tenant.supportEmail}
-                          name="supportEmail"
-                          type="email"
-                        />
-                      </label>
+                        <label className="space-y-2">
+                          <span className="text-sm font-medium text-slate-700">Support email</span>
+                          <input
+                            className={inputClassName()}
+                            defaultValue={tenant.supportEmail}
+                            name="supportEmail"
+                            type="email"
+                          />
+                        </label>
 
-                      <label className="space-y-2">
-                        <span className="text-sm font-medium text-slate-700">Support phone</span>
-                        <input
-                          className={inputClassName()}
-                          defaultValue={tenant.supportPhone}
-                          name="supportPhone"
-                          type="tel"
-                        />
-                      </label>
+                        <label className="space-y-2">
+                          <span className="text-sm font-medium text-slate-700">Support phone</span>
+                          <input
+                            className={inputClassName()}
+                            defaultValue={tenant.supportPhone}
+                            name="supportPhone"
+                            type="tel"
+                          />
+                        </label>
 
-                      <label className="space-y-2">
-                        <span className="text-sm font-medium text-slate-700">Timezone</span>
-                        <input
-                          className={inputClassName()}
-                          defaultValue={tenant.timezone}
-                          name="timezone"
-                          required
-                          type="text"
-                        />
-                      </label>
+                        <label className="space-y-2">
+                          <span className="text-sm font-medium text-slate-700">Timezone</span>
+                          <input
+                            className={inputClassName()}
+                            defaultValue={tenant.timezone}
+                            name="timezone"
+                            required
+                            type="text"
+                          />
+                        </label>
 
-                      <label className="space-y-2">
-                        <span className="text-sm font-medium text-slate-700">Locale</span>
-                        <input
-                          className={inputClassName()}
-                          defaultValue={tenant.locale}
-                          name="locale"
-                          required
-                          type="text"
-                        />
-                      </label>
+                        <label className="space-y-2">
+                          <span className="text-sm font-medium text-slate-700">Locale</span>
+                          <input
+                            className={inputClassName()}
+                            defaultValue={tenant.locale}
+                            name="locale"
+                            required
+                            type="text"
+                          />
+                        </label>
 
-                      <label className="space-y-2">
-                        <span className="text-sm font-medium text-slate-700">Subscription plan</span>
-                        <input
-                          className={inputClassName()}
-                          defaultValue={tenant.subscriptionPlan}
-                          name="subscriptionPlan"
-                          type="text"
-                        />
-                      </label>
+                        <label className="space-y-2">
+                          <span className="text-sm font-medium text-slate-700">Subscription plan</span>
+                          <input
+                            className={inputClassName()}
+                            defaultValue={tenant.subscriptionPlan}
+                            name="subscriptionPlan"
+                            type="text"
+                          />
+                        </label>
 
-                      <label className="space-y-2 md:col-span-2 xl:col-span-3">
-                        <span className="text-sm font-medium text-slate-700">Subscription status</span>
-                        <input
-                          className={inputClassName()}
-                          defaultValue={tenant.subscriptionStatus}
-                          name="subscriptionStatus"
-                          type="text"
-                        />
-                      </label>
+                        <label className="space-y-2 md:col-span-2 xl:col-span-3">
+                          <span className="text-sm font-medium text-slate-700">Subscription status</span>
+                          <input
+                            className={inputClassName()}
+                            defaultValue={tenant.subscriptionStatus}
+                            name="subscriptionStatus"
+                            type="text"
+                          />
+                        </label>
 
-                      <div className="md:col-span-2 xl:col-span-3 flex justify-end">
-                        <button className={buttonClassName('secondary')} type="submit">
-                          Save tenant changes
-                        </button>
-                      </div>
-                    </form>
+                        <div className="md:col-span-2 xl:col-span-3 flex justify-end">
+                          <button className={buttonClassName('secondary')} type="submit">
+                            Save tenant changes
+                          </button>
+                        </div>
+                      </form>
+
+                      {data.profile.role === 'SUPER_ADMIN' ? (
+                        <details className="rounded-lg border border-red-200 bg-red-50 p-3 md:max-w-md">
+                          <summary className="cursor-pointer list-none text-sm font-medium text-red-700">
+                            Delete tenant
+                          </summary>
+
+                          <form action={deleteTenantAction} className="mt-4 grid gap-3">
+                            <input name="tenantId" type="hidden" value={tenant.id} />
+
+                            <div className="rounded-md border border-red-200 bg-white px-3 py-2 text-xs text-red-700">
+                              This permanently deletes the tenant and its scoped records. Type{' '}
+                              <span className="font-semibold">{tenant.slug}</span> to confirm.
+                            </div>
+
+                            <label className="space-y-1">
+                              <span className="text-xs font-medium uppercase tracking-wide text-red-700">
+                                Confirmation
+                              </span>
+                              <input
+                                className={inputClassName()}
+                                name="confirmationText"
+                                placeholder={tenant.slug}
+                                required
+                                type="text"
+                              />
+                            </label>
+
+                            <div className="flex justify-end">
+                              <button className={buttonClassName('danger')} type="submit">
+                                Delete tenant permanently
+                              </button>
+                            </div>
+                          </form>
+                        </details>
+                      ) : null}
+                    </div>
                   </details>
                 ))}
 

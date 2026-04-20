@@ -132,6 +132,11 @@ const updateTenantSchema = z.object({
   subscriptionStatus: z.string().trim().max(50, 'Subscription status is too long').optional(),
 });
 
+const deleteTenantSchema = z.object({
+  tenantId: z.string().trim().min(1, 'Tenant id is required'),
+  confirmationText: z.string().trim().min(1, 'Type the tenant slug to confirm deletion.'),
+});
+
 type Actor = {
   id: string;
   role: (typeof USER_ROLES)[number];
@@ -454,6 +459,68 @@ export async function updateTenantAction(formData: FormData): Promise<void> {
 
   revalidatePath(SETTINGS_PATH);
   redirectWithMessage('Tenant updated successfully.');
+}
+
+export async function deleteTenantAction(formData: FormData): Promise<void> {
+  const actor = await getActor();
+  ensureSuperAdmin(actor);
+
+  const parsed = deleteTenantSchema.safeParse({
+    tenantId: getString(formData, 'tenantId'),
+    confirmationText: getString(formData, 'confirmationText'),
+  });
+
+  if (!parsed.success) {
+    redirectWithError(parsed.error.issues[0]?.message ?? 'Delete confirmation is invalid.');
+  }
+
+  const existingTenant = await db.tenant.findUnique({
+    where: { id: parsed.data.tenantId },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+    },
+  });
+
+  if (!existingTenant) {
+    redirectWithError('The selected tenant was not found.');
+  }
+
+  if (parsed.data.confirmationText.trim().toLowerCase() !== existingTenant.slug.toLowerCase()) {
+    redirectWithError(`Type ${existingTenant.slug} exactly to confirm tenant deletion.`);
+  }
+
+  try {
+    await db.$transaction(async (tx) => {
+      const users = await tx.user.findMany({
+        where: { tenantId: existingTenant.id },
+        select: {
+          id: true,
+        },
+      });
+
+      const userIds = users.map((user) => user.id);
+
+      await tx.tenant.delete({
+        where: { id: existingTenant.id },
+      });
+
+      if (userIds.length > 0) {
+        await tx.user.deleteMany({
+          where: { id: { in: userIds } },
+        });
+      }
+    });
+  } catch (error) {
+    console.error('deleteTenantAction failed', error);
+    redirectWithError(
+      'The tenant could not be deleted. Remove or reassign dependent records and try again.',
+    );
+  }
+
+  revalidatePath(SETTINGS_PATH);
+  redirectWithMessage(`Tenant ${existingTenant.name} deleted successfully.`);
 }
 
 export async function updateProfileAction(formData: FormData): Promise<void> {
