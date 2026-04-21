@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth';
 
 import { DashboardShell } from '@/components/dashboard/shell';
 import { getAnalyticsData } from '@/lib/queries/analytics';
-import { authOptions } from '@/lib/auth';
+import { authOptions, type AppRole } from '@/lib/auth';
 
 export const metadata: Metadata = {
   title: 'Analytics',
@@ -23,7 +23,7 @@ export default async function AnalyticsPage() {
     <DashboardShell
       title="Analytics"
       description="Operational trends, performance metrics, and conversion health."
-      role={session.user.role as string}
+      role={session.user.role as AppRole}
     >
 
       <div className="grid gap-6 lg:grid-cols-4">
