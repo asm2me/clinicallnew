@@ -29,6 +29,29 @@ export interface DashboardNavProps {
   role: string;
 }
 
+function navMeta(item: NavItem) {
+  switch (item.label) {
+    case 'Overview':
+      return 'Daily brief';
+    case 'Appointments':
+      return 'Schedule flow';
+    case 'Patients':
+      return 'Care records';
+    case 'Clinics':
+      return 'Locations';
+    case 'Users':
+      return 'Access control';
+    case 'Analytics':
+      return 'Performance';
+    case 'Tenants':
+      return 'Workspace admin';
+    case 'Settings':
+      return 'Preferences';
+    default:
+      return 'Workspace';
+  }
+}
+
 export function DashboardNav({ role }: DashboardNavProps) {
   const pathname = usePathname();
   const [currentHash, setCurrentHash] = useState('');
@@ -45,80 +68,83 @@ export function DashboardNav({ role }: DashboardNavProps) {
   const visibleItems = navItems.filter((item) => !item.roles || item.roles.includes(role));
 
   return (
-    <nav aria-label="Dashboard navigation" className="space-y-3">
-      <div className="flex flex-wrap gap-2">
-        {visibleItems.map((item, index) => {
-          const [itemPath, itemHash] = item.href.split('#');
-          const normalizedHash = itemHash ? `#${itemHash}` : '';
-          const isActive = normalizedHash
-            ? pathname === itemPath && currentHash === normalizedHash
-            : item.href === '/dashboard'
-              ? pathname === item.href
-              : pathname === item.href || pathname.startsWith(`${item.href}/`);
+    <nav aria-label="Dashboard navigation" className="space-y-4">
+      <div>
+        <p className="px-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+          Workspace navigation
+        </p>
 
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              aria-current={isActive ? "page" : undefined}
-              className={[
-                "group min-w-[11rem] flex-1 rounded-2xl border px-4 py-3 transition md:flex-none",
-                isActive
-                  ? "border-primary/40 bg-primary/10 text-foreground shadow-sm"
-                  : "border-border/70 bg-card/70 text-muted-foreground hover:border-foreground/15 hover:bg-accent",
-              ].join(" ")}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={[
-                        "flex h-7 w-7 items-center justify-center rounded-full border",
-                        isActive
-                          ? "border-primary/30 bg-background text-primary"
-                          : "border-border bg-background text-muted-foreground group-hover:text-foreground",
-                      ].join(" ")}
-                    >
-                      <span className="text-[11px] font-semibold">
-                        {String(index + 1).padStart(2, "0")}
-                      </span>
-                    </span>
-                    <span
-                      className={[
-                        "truncate text-sm font-medium",
-                        isActive ? "text-foreground" : "text-foreground/90 group-hover:text-foreground",
-                      ].join(" ")}
-                    >
-                      {item.label}
-                    </span>
-                  </div>
-                  <p
+        <div className="mt-3 space-y-2">
+          {visibleItems.map((item, index) => {
+            const [itemPath, itemHash] = item.href.split('#');
+            const normalizedHash = itemHash ? `#${itemHash}` : '';
+            const isActive = normalizedHash
+              ? pathname === itemPath && currentHash === normalizedHash
+              : item.href === '/dashboard'
+                ? pathname === item.href
+                : pathname === item.href || pathname.startsWith(`${item.href}/`);
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={isActive ? "page" : undefined}
+                className={[
+                  "group flex items-center gap-3 rounded-2xl border px-3 py-3 transition",
+                  isActive
+                    ? "border-primary/30 bg-primary/10 text-foreground shadow-sm"
+                    : "border-transparent text-muted-foreground hover:border-border/70 hover:bg-background/80 hover:text-foreground",
+                ].join(" ")}
+              >
+                <span
+                  className={[
+                    "flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border text-xs font-semibold transition",
+                    isActive
+                      ? "border-primary/30 bg-background text-primary"
+                      : "border-border/70 bg-card text-muted-foreground group-hover:text-foreground",
+                  ].join(" ")}
+                >
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+
+                <span className="min-w-0 flex-1">
+                  <span
                     className={[
-                      "mt-2 truncate pl-9 text-xs uppercase tracking-[0.18em]",
+                      "block truncate text-sm font-medium",
+                      isActive ? "text-foreground" : "text-foreground/90 group-hover:text-foreground",
+                    ].join(" ")}
+                  >
+                    {item.label}
+                  </span>
+                  <span
+                    className={[
+                      "mt-1 block truncate text-xs uppercase tracking-[0.18em]",
                       isActive ? "text-primary/80" : "text-muted-foreground",
                     ].join(" ")}
                   >
-                    {normalizedHash
-                      ? normalizedHash.replace("#", "")
-                      : itemPath
-                          .replace("/dashboard", "root")
-                          .replace(/\//g, " / ")}
-                  </p>
-                </div>
+                    {navMeta(item)}
+                  </span>
+                </span>
+
                 <span
                   className={[
-                    "mt-1 h-2.5 w-2.5 rounded-full",
+                    "h-2.5 w-2.5 shrink-0 rounded-full transition",
                     isActive ? "bg-primary" : "bg-border group-hover:bg-foreground/20",
                   ].join(" ")}
                 />
-              </div>
-            </Link>
-          );
-        })}
+              </Link>
+            );
+          })}
+        </div>
       </div>
 
-      <div className="rounded-2xl border border-border/70 bg-background/70 px-4 py-3 text-xs uppercase tracking-[0.18em] text-muted-foreground">
-        Dock shows only routes available to the active role.
+      <div className="rounded-2xl border border-border/70 bg-background/75 px-4 py-3">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+          Navigation note
+        </p>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+          The workspace list only reveals destinations available to the active role.
+        </p>
       </div>
     </nav>
   );

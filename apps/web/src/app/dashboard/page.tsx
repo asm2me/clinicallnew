@@ -35,7 +35,7 @@ export default async function DashboardPage() {
   return (
     <DashboardShell
       title="Overview"
-      description="A live operations readout for today's schedule, active follow-up, and clinic momentum."
+      description="A refined workspace for today’s schedule, active follow-up, and the signals that matter most."
       role={role}
     >
       <div className="space-y-6">
@@ -44,14 +44,14 @@ export default async function DashboardPage() {
             <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
               <div className="max-w-2xl">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-                  Situation room
+                  Daily brief
                 </p>
                 <h2 className="mt-3 text-2xl font-semibold tracking-tight text-foreground">
-                  See the day at a glance before moving into execution.
+                  Start with a calm read of the day before stepping into action.
                 </h2>
                 <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
-                  This overview compresses the clinic's current posture into signals, active
-                  work, and notable exceptions so the next action is obvious.
+                  This overview brings today’s schedule, notable exceptions, and active work into
+                  a quieter single canvas so priorities feel immediate without feeling crowded.
                 </p>
               </div>
 
@@ -73,7 +73,7 @@ export default async function DashboardPage() {
                     <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
                       Decision mode
                     </p>
-                    <p className="mt-2 text-xl font-semibold text-foreground">Command center</p>
+                    <p className="mt-2 text-xl font-semibold text-foreground">Elegant workspace</p>
                   </div>
                 </div>
               </div>
@@ -87,7 +87,7 @@ export default async function DashboardPage() {
                   Priority highlights
                 </p>
                 <h2 className="mt-2 text-lg font-semibold text-foreground">
-                  What needs attention now
+                  Where attention belongs now
                 </h2>
               </div>
               <span className="rounded-full border border-border bg-card px-3 py-1 text-xs uppercase tracking-[0.18em] text-muted-foreground">
@@ -114,12 +114,12 @@ export default async function DashboardPage() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-                Signal board
+                Metrics board
               </p>
               <h2 className="mt-2 text-lg font-semibold text-foreground">Core clinic metrics</h2>
             </div>
             <p className="text-sm text-muted-foreground">
-              Read the primary indicators before diving into detailed workflows.
+              Read the primary indicators first, then move into the workflow that needs care.
             </p>
           </div>
 
@@ -151,14 +151,14 @@ export default async function DashboardPage() {
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-                  Live activity lane
+                  Activity timeline
                 </p>
                 <h2 className="mt-2 text-lg font-semibold text-foreground">
                   Recent movement across the clinic
                 </h2>
               </div>
               <p className="text-sm text-muted-foreground">
-                A chronological queue of updates, tasks, and operational changes.
+                A quieter chronological read of updates, tasks, and operational changes.
               </p>
             </div>
 
@@ -223,14 +223,14 @@ export default async function DashboardPage() {
 
             <section className="rounded-[2rem] border border-border/70 bg-card/90 p-6 shadow-sm">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-                Operating cue
+                Workspace cue
               </p>
               <h2 className="mt-2 text-lg font-semibold text-foreground">
-                Use this board as a launch surface, not a destination.
+                Let the overview guide focus, then move forward with intention.
               </h2>
               <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                Review signals, identify the queue that needs action, then move directly into the
-                appropriate workflow from the dock.
+                Review the brief, notice the queue that needs attention, and enter the right
+                workflow from the sidebar without breaking concentration.
               </p>
             </section>
           </div>
