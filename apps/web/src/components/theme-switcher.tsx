@@ -59,9 +59,9 @@ export default function ThemeSwitcher() {
                 ? 'bg-primary text-primary-foreground shadow-lg scale-105'
                 : 'bg-muted text-muted-foreground hover:bg-muted/80'
             }`}
-            title="Lagoon Theme"
+            title="Obsidian Gold Theme"
           >
-            🌊 Lagoon
+            🖤 Obsidian Gold
           </button>
           <button
             onClick={() => handleThemeChange('ocean')}
@@ -70,9 +70,9 @@ export default function ThemeSwitcher() {
                 ? 'bg-primary text-primary-foreground shadow-lg scale-105'
                 : 'bg-muted text-muted-foreground hover:bg-muted/80'
             }`}
-            title="Sunset Theme"
+            title="Bronze Luxe Theme"
           >
-            🌇 Sunset
+            ✨ Bronze Luxe
           </button>
         </div>
       </div>

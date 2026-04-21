@@ -19,8 +19,8 @@ export default function ThemeDemoPage() {
             Theme Showcase
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Explore the refreshed themes available. Switch between the calm Lagoon palette
-            and the vibrant Sunset palette to see the full visual transformation.
+            Explore the refreshed luxury themes available. Switch between the dramatic Obsidian Gold
+            palette and the warm Bronze Luxe palette to see the full visual transformation.
           </p>
         </section>
 
@@ -105,9 +105,9 @@ export default function ThemeDemoPage() {
               <div className="icon-wrap mb-4">
                 <span className="text-2xl">📊</span>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Patient Insights</h3>
+              <h3 className="text-xl font-semibold mb-2">Executive Insights</h3>
               <p className="text-muted-foreground">
-                Track clinic performance with cleaner, calmer visual emphasis.
+                Track clinic performance with premium contrast, richer surfaces, and elevated highlights.
               </p>
             </div>
 
@@ -115,9 +115,9 @@ export default function ThemeDemoPage() {
               <div className="icon-wrap mb-4">
                 <span className="text-2xl">🎨</span>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Care Experience</h3>
+              <h3 className="text-xl font-semibold mb-2">Premium Care Experience</h3>
               <p className="text-muted-foreground">
-                Present workflows with a more polished and trustworthy visual system.
+                Present workflows with refined black-and-gold styling that feels upscale and deliberate.
               </p>
             </div>
 
@@ -125,9 +125,9 @@ export default function ThemeDemoPage() {
               <div className="icon-wrap mb-4">
                 <span className="text-2xl">⚡</span>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Operations</h3>
+              <h3 className="text-xl font-semibold mb-2">Luxury Operations</h3>
               <p className="text-muted-foreground">
-                Keep scheduling, staffing, and reporting surfaces visually distinct and clear.
+                Keep scheduling, staffing, and reporting surfaces elegant, focused, and easy to scan.
               </p>
             </div>
           </div>
@@ -178,11 +178,11 @@ export default function ThemeDemoPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="hero-gradient rounded-2xl p-12 text-center text-white">
               <h3 className="text-2xl font-bold mb-2">Hero Gradient</h3>
-              <p className="opacity-90">Ideal for strong landing headers and product highlights</p>
+              <p className="opacity-90">Designed for premium hero sections, launches, and flagship messaging</p>
             </div>
             <div className="surface-gradient rounded-2xl p-12 text-center border">
               <h3 className="text-2xl font-bold mb-2">Surface Gradient</h3>
-              <p className="text-muted-foreground">Subtle depth for dashboards, cards, and sections</p>
+              <p className="text-muted-foreground">Layered depth for dark dashboards, cards, and executive sections</p>
             </div>
           </div>
         </section>
@@ -195,7 +195,7 @@ export default function ThemeDemoPage() {
               <h3 className="text-2xl font-bold mb-4">Glass Card Effect</h3>
               <p className="text-muted-foreground">
                 This card uses a glass morphism effect with backdrop blur.
-                It creates a frosted surface that pairs cleanly with both the Lagoon and Sunset themes.
+                It creates a polished dark surface that pairs cleanly with both the Obsidian Gold and Bronze Luxe themes.
               </p>
             </div>
           </div>

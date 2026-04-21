@@ -1,20 +1,20 @@
 # Theme Guide
 
-This project now supports multiple beautiful themes that you can switch between dynamically.
+This project now supports multiple luxury dark themes that you can switch between dynamically.
 
 ## Available Themes
 
-### 🌊 Lagoon Theme
-- **Primary Color:** Teal (`#0f766e`)
-- **Secondary Color:** Sky (`#0ea5e9`)
-- **Accent Color:** Gold (`#eab308`)
-- Perfect for healthcare dashboards, calm interfaces, and trustworthy product experiences
+### 🖤 Obsidian Gold Theme
+- **Primary Color:** Rich Gold (`#d4af37`)
+- **Secondary Color:** Deep Bronze (`#7a5a24`)
+- **Accent Color:** Luminous Gold (`#e6bb2f`)
+- Perfect for premium dashboards, executive admin panels, and high-end brand experiences
 
-### 🌇 Sunset Theme
-- **Primary Color:** Rose (`#be185d`)
-- **Secondary Color:** Orange (`#f97316`)
-- **Accent Color:** Blue (`#3b82f6`)
-- Perfect for high-energy marketing pages, bold campaigns, and warmer visual storytelling
+### ✨ Bronze Luxe Theme
+- **Primary Color:** Bronze Gold (`#b8860b`)
+- **Secondary Color:** Burnished Brown (`#6f502f`)
+- **Accent Color:** Warm Amber Bronze (`#c58531`)
+- Perfect for refined dark marketing pages, luxury product surfaces, and elevated storytelling
 
 ## How to Use Themes
 
@@ -38,11 +38,11 @@ export default function MyPage() {
 Add the theme class to your HTML element:
 
 ```tsx
-// Switch to Sunset theme
+// Switch to Bronze Luxe theme
 document.documentElement.classList.add('ocean');
 document.documentElement.classList.remove('default');
 
-// Switch to Lagoon theme
+// Switch to Obsidian Gold theme
 document.documentElement.classList.add('default');
 document.documentElement.classList.remove('ocean');
 
@@ -54,28 +54,28 @@ document.documentElement.classList.toggle('dark');
 Use the theme-specific color classes:
 
 ```tsx
-// Sunset theme colors
-<div className="bg-primary_ocean-500 text-white">
-  This uses the Sunset primary color
+// Bronze Luxe theme colors
+<div className="bg-primary_ocean-500 text-black">
+  This uses the Bronze Luxe primary color
 </div>
 
-// Lagoon theme colors
-<div className="bg-primary-500 text-white">
-  This uses the Lagoon primary color
+// Obsidian Gold theme colors
+<div className="bg-primary-500 text-black">
+  This uses the Obsidian Gold primary color
 </div>
 ```
 
 ## Theme Color Palettes
 
-### Lagoon Theme Colors
-- **Primary 500:** `#14b8a6` (Teal)
-- **Secondary 500:** `#0ea5e9` (Sky)
-- **Accent 500:** `#eab308` (Gold)
+### Obsidian Gold Theme Colors
+- **Primary 500:** `#d4af37` (Rich Gold)
+- **Secondary 500:** `#7a5a24` (Deep Bronze)
+- **Accent 500:** `#e6bb2f` (Luminous Gold)
 
-### Sunset Theme Colors
-- **Primary 500:** `#f43f5e` (Rose)
-- **Secondary 500:** `#f97316` (Orange)
-- **Accent 500:** `#3b82f6` (Blue)
+### Bronze Luxe Theme Colors
+- **Primary 500:** `#b8860b` (Bronze Gold)
+- **Secondary 500:** `#6f502f` (Burnished Brown)
+- **Accent 500:** `#c58531` (Warm Amber Bronze)
 
 ## CSS Variables
 
@@ -169,21 +169,21 @@ Each theme uses CSS variables for consistent styling:
 
 ## Dark Mode
 
-Both themes support dark mode. Combine the `dark` class with any theme:
+Both themes are designed around dark luxury surfaces, and support the `dark` class as enhanced darker variants:
 
 ```tsx
-// Light Sunset
-document.documentElement.classList.add('ocean');
-
-// Dark Sunset
-document.documentElement.classList.add('ocean', 'dark');
-
-// Light Lagoon
+// Obsidian Gold
 document.documentElement.classList.remove('ocean');
 
-// Dark Lagoon
+// Dark Obsidian Gold
 document.documentElement.classList.remove('ocean');
 document.documentElement.classList.add('dark');
+
+// Bronze Luxe
+document.documentElement.classList.add('ocean');
+
+// Dark Bronze Luxe
+document.documentElement.classList.add('ocean', 'dark');
 ```
 
 ## Demo Page
@@ -200,7 +200,7 @@ Visit `/theme-demo` to see a comprehensive showcase of all theme features includ
 ## Theme Switcher Features
 
 The `ThemeSwitcher` component provides:
-- One-click theme switching between Lagoon and Sunset themes
+- One-click theme switching between Obsidian Gold and Bronze Luxe
 - Dark mode toggle
 - Local storage persistence (remembers your choice)
 - Visual feedback on active theme
@@ -220,27 +220,27 @@ primary_custom: {
 2. **Add CSS variables to `globals.css`:**
 ```css
 .custom {
-  --primary: 199 89% 48%;
-  // ... other variables
+  --primary: 45 90% 55%;
+  /* ... other variables */
 }
 
 .dark.custom {
-  --primary: 199 89% 45%;
-  // ... dark mode variables
+  --primary: 45 90% 65%;
+  /* ... dark mode variables */
 }
 ```
 
 3. **Update ThemeSwitcher component:**
 ```tsx
 const [theme, setTheme] = useState<Theme>('default' | 'ocean' | 'custom');
-/* 'default' maps to Lagoon and 'ocean' maps to Sunset */
+/* 'default' maps to Obsidian Gold and 'ocean' maps to Bronze Luxe */
 ```
 
 ## Best Practices
 
 1. **Use CSS Variables:** Always use CSS variables for theme colors to ensure consistency
-2. **Test Both Themes:** Make sure your components look good in both themes
-3. **Test Dark Mode:** Always test both light and dark modes
+2. **Test Both Themes:** Make sure your components look good in both theme variants
+3. **Test Dark Mode:** Always test both dark variants thoroughly
 4. **Maintain Contrast:** Ensure sufficient contrast ratios for accessibility
 5. **Use Semantic Colors:** Use success/warning/danger variables for appropriate states
 
