@@ -9,6 +9,14 @@ declare module 'next-auth' {
       tenantId: string | null;
       clinicId: string | null;
       patientId: string | null;
+    isImpersonating?: boolean;
+    impersonatorId?: string | null;
+    impersonatorName?: string | null;
+    impersonatorEmail?: string | null;
+      isImpersonating?: boolean;
+      impersonatorId?: string | null;
+      impersonatorName?: string | null;
+      impersonatorEmail?: string | null;
     } & DefaultSession['user'];
   }
 
@@ -26,5 +34,9 @@ declare module 'next-auth/jwt' {
     tenantId?: string | null;
     clinicId?: string | null;
     patientId?: string | null;
+    isImpersonating?: boolean;
+    impersonatorId?: string | null;
+    impersonatorName?: string | null;
+    impersonatorEmail?: string | null;
   }
 }

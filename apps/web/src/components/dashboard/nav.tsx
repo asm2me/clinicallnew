@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
-type NavItem = { href: string; label: string; icon: string };
+type NavItem = { href: string; label: string; icon: string; roles?: string[] };
 
 const navItems: NavItem[] = [
   { href: '/dashboard', label: 'Overview', icon: '▤' },
@@ -11,6 +12,7 @@ const navItems: NavItem[] = [
   { href: '/dashboard/patients', label: 'Patients', icon: '👤' },
   { href: '/dashboard/clinics', label: 'Clinics', icon: '🏥' },
   { href: '/dashboard/analytics', label: 'Analytics', icon: '📊' },
+  { href: '/dashboard/settings#tenant-management', label: 'Tenants', icon: '🏢', roles: ['SUPER_ADMIN'] },
   { href: '/dashboard/settings', label: 'Settings', icon: '⚙️' },
 ];
 
@@ -18,13 +20,27 @@ type DashboardNavProps = { role: string };
 
 export function DashboardNav({ role }: DashboardNavProps) {
   const pathname = usePathname();
+  const [hash, setHash] = useState('');
+  const visibleItems = navItems.filter((item) => !item.roles || item.roles.includes(role));
+
+  useEffect(() => {
+    const updateHash = () => setHash(window.location.hash);
+
+    updateHash();
+    window.addEventListener('hashchange', updateHash);
+
+    return () => window.removeEventListener('hashchange', updateHash);
+  }, []);
 
   return (
     <nav aria-label="Dashboard navigation" className="space-y-0.5">
-      {navItems.map((item) => {
-        // Exact match for root /dashboard, prefix match for sub-routes
-        const isActive =
-          item.href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(item.href);
+      {visibleItems.map((item) => {
+        const [matchHref, matchHash = ''] = item.href.split('#');
+        const isActive = matchHash
+          ? pathname === matchHref && hash === `#${matchHash}`
+          : matchHref === '/dashboard'
+            ? pathname === '/dashboard'
+            : pathname.startsWith(matchHref);
 
         return (
           <Link

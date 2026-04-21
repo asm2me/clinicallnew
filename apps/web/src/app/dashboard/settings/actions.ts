@@ -680,6 +680,11 @@ export async function deleteUserAction(formData: FormData): Promise<void> {
   }
 
   const existingUser = await getManagedUser(actor, parsed.data.userId);
+
+  if (existingUser.role === 'SUPER_ADMIN') {
+    redirectWithError('Super admin users cannot be deleted.');
+  }
+
   const expectedConfirmation = existingUser.email.toLowerCase();
 
   if (parsed.data.confirmationText.trim().toLowerCase() !== expectedConfirmation) {

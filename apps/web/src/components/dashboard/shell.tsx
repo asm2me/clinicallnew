@@ -1,6 +1,9 @@
 import Link from 'next/link';
+
 import { SignOutButton } from '@/components/auth/sign-out-button';
+import { stopUserImpersonationAction } from '@/app/dashboard/users/impersonation-actions';
 import { DashboardNav } from '@/components/dashboard/nav';
+import { getEffectiveDashboardUser } from '@/lib/impersonation';
 
 type DashboardShellProps = {
   title?: string;
@@ -28,7 +31,10 @@ const roleTone: Record<string, RoleToneConfig> = {
   'Patient': { bg: 'bg-sky-500/10', text: 'text-sky-700 dark:text-sky-300', dot: 'bg-sky-500' }
 };
 
-export function DashboardShell({ title, description, role, children }: DashboardShellProps) {
+export async function DashboardShell({ title, description, role, children }: DashboardShellProps) {
+  const effectiveUser = await getEffectiveDashboardUser();
+  const impersonationName = effectiveUser?.name || effectiveUser?.email || 'selected user';
+
   return (
     <div className="odoo-shell min-h-screen">
       <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 lg:flex-row lg:px-8">
@@ -85,7 +91,32 @@ export function DashboardShell({ title, description, role, children }: Dashboard
             </div>
           </header>
 
-          <div>{children}</div>
+          <div className="space-y-6">
+            {effectiveUser?.isImpersonating ? (
+              <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-900">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <div className="font-semibold">Impersonation mode active</div>
+                    <div className="mt-1 text-amber-800">
+                      You are viewing the dashboard as {impersonationName}. Stop impersonation to return to your
+                      super admin account.
+                    </div>
+                  </div>
+
+                  <form action={stopUserImpersonationAction}>
+                    <button
+                      type="submit"
+                      className="inline-flex items-center justify-center rounded-md border border-amber-300 bg-white px-3 py-2 text-sm font-medium text-amber-900 transition hover:bg-amber-100"
+                    >
+                      Return to super admin
+                    </button>
+                  </form>
+                </div>
+              </div>
+            ) : null}
+
+            <div>{children}</div>
+          </div>
         </div>
       </div>
     </div>

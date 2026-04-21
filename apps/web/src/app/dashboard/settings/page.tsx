@@ -54,6 +54,10 @@ function selectClassName() {
   return inputClassName();
 }
 
+function statusTooltip(action: string, subject: string) {
+  return `${action} ${subject}. Success or error status will appear at the top of Settings.`;
+}
+
 export default async function SettingsPage({ searchParams }: SettingsPageProps) {
   const session = await getServerSession(authOptions);
 
@@ -150,7 +154,11 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                 Changes update your account record immediately across the dashboard.
               </div>
 
-              <button className={buttonClassName()} type="submit">
+              <button
+                className={buttonClassName()}
+                title={statusTooltip('Save', 'your profile')}
+                type="submit"
+              >
                 Save profile
               </button>
             </div>
@@ -289,7 +297,11 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                   </div>
 
                   <div className="md:col-span-2 xl:col-span-3 flex justify-end">
-                    <button className={buttonClassName()} type="submit">
+                    <button
+                      className={buttonClassName()}
+                      title={statusTooltip('Create', 'a tenant')}
+                      type="submit"
+                    >
                       Create tenant
                     </button>
                   </div>
@@ -297,7 +309,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
               </div>
             ) : null}
 
-            <section className="odoo-panel space-y-4">
+            <section id="tenant-management" className="odoo-panel space-y-4">
               <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
                 <div>
                   <h2 className="text-lg font-semibold text-slate-900">Tenant management</h2>
@@ -449,7 +461,11 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                         </label>
 
                         <div className="md:col-span-2 xl:col-span-3 flex justify-end">
-                          <button className={buttonClassName('secondary')} type="submit">
+                          <button
+                            className={buttonClassName('secondary')}
+                            title={statusTooltip('Save', 'tenant changes')}
+                            type="submit"
+                          >
                             Save tenant changes
                           </button>
                         </div>
@@ -483,7 +499,11 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                             </label>
 
                             <div className="flex justify-end">
-                              <button className={buttonClassName('danger')} type="submit">
+                              <button
+                                className={buttonClassName('danger')}
+                                title={statusTooltip('Delete', 'this tenant permanently')}
+                                type="submit"
+                              >
                                 Delete tenant permanently
                               </button>
                             </div>
@@ -579,7 +599,11 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                 </label>
 
                 <div className="md:col-span-2 xl:col-span-3 flex justify-end">
-                  <button className={buttonClassName()} type="submit">
+                  <button
+                    className={buttonClassName()}
+                    title={statusTooltip('Create', 'a user')}
+                    type="submit"
+                  >
                     Create user
                   </button>
                 </div>
@@ -767,46 +791,63 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                                   </label>
 
                                   <div className="flex justify-end">
-                                    <button className={buttonClassName('secondary')} type="submit">
+                                    <button
+                                      className={buttonClassName('secondary')}
+                                      title={statusTooltip('Save', 'user changes')}
+                                      type="submit"
+                                    >
                                       Save changes
                                     </button>
                                   </div>
                                 </form>
                               </details>
 
-                              <details className="w-full rounded-lg border border-red-200 bg-red-50 p-3">
-                                <summary className="cursor-pointer list-none text-sm font-medium text-red-700">
-                                  Delete user
-                                </summary>
+                              {user.role === 'SUPER_ADMIN' ? (
+                                <div
+                                  className="w-full rounded-lg border border-amber-200 bg-amber-50 px-3 py-3 text-sm text-amber-800"
+                                  title="Super admin users are protected and cannot be deleted."
+                                >
+                                  Super admin users are protected and cannot be deleted.
+                                </div>
+                              ) : (
+                                <details className="w-full rounded-lg border border-red-200 bg-red-50 p-3">
+                                  <summary className="cursor-pointer list-none text-sm font-medium text-red-700">
+                                    Delete user
+                                  </summary>
 
-                                <form action={deleteUserAction} className="mt-4 grid gap-3">
-                                  <input name="userId" type="hidden" value={user.id} />
+                                  <form action={deleteUserAction} className="mt-4 grid gap-3">
+                                    <input name="userId" type="hidden" value={user.id} />
 
-                                  <div className="rounded-md border border-red-200 bg-white px-3 py-2 text-xs text-red-700">
-                                    This permanently deletes the user and cascades their related records. Type{' '}
-                                    <span className="font-semibold">{user.email}</span> to confirm.
-                                  </div>
+                                    <div className="rounded-md border border-red-200 bg-white px-3 py-2 text-xs text-red-700">
+                                      This permanently deletes the user and cascades their related records. Type{' '}
+                                      <span className="font-semibold">{user.email}</span> to confirm.
+                                    </div>
 
-                                  <label className="space-y-1">
-                                    <span className="text-xs font-medium uppercase tracking-wide text-red-700">
-                                      Confirmation
-                                    </span>
-                                    <input
-                                      className={inputClassName()}
-                                      name="confirmationText"
-                                      placeholder={user.email}
-                                      required
-                                      type="text"
-                                    />
-                                  </label>
+                                    <label className="space-y-1">
+                                      <span className="text-xs font-medium uppercase tracking-wide text-red-700">
+                                        Confirmation
+                                      </span>
+                                      <input
+                                        className={inputClassName()}
+                                        name="confirmationText"
+                                        placeholder={user.email}
+                                        required
+                                        type="text"
+                                      />
+                                    </label>
 
-                                  <div className="flex justify-end">
-                                    <button className={buttonClassName('danger')} type="submit">
-                                      Delete permanently
-                                    </button>
-                                  </div>
-                                </form>
-                              </details>
+                                    <div className="flex justify-end">
+                                      <button
+                                        className={buttonClassName('danger')}
+                                        title={statusTooltip('Delete', 'this user permanently')}
+                                        type="submit"
+                                      >
+                                        Delete permanently
+                                      </button>
+                                    </div>
+                                  </form>
+                                </details>
+                              )}
                             </div>
                           </td>
                         </tr>
