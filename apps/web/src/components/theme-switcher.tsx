@@ -59,9 +59,9 @@ export default function ThemeSwitcher() {
                 ? 'bg-primary text-primary-foreground shadow-lg scale-105'
                 : 'bg-muted text-muted-foreground hover:bg-muted/80'
             }`}
-            title="Aurora Theme"
+            title="Lagoon Theme"
           >
-            ✨ Aurora
+            🌊 Lagoon
           </button>
           <button
             onClick={() => handleThemeChange('ocean')}
@@ -70,9 +70,9 @@ export default function ThemeSwitcher() {
                 ? 'bg-primary text-primary-foreground shadow-lg scale-105'
                 : 'bg-muted text-muted-foreground hover:bg-muted/80'
             }`}
-            title="Ember Theme"
+            title="Sunset Theme"
           >
-            🔥 Ember
+            🌇 Sunset
           </button>
         </div>
       </div>

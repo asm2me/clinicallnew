@@ -19,8 +19,8 @@ export default function ThemeDemoPage() {
             Theme Showcase
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Explore the refreshed themes available. Switch between the luminous Aurora palette
-            and the warm Ember palette to see the full visual transformation.
+            Explore the refreshed themes available. Switch between the calm Lagoon palette
+            and the vibrant Sunset palette to see the full visual transformation.
           </p>
         </section>
 
@@ -105,9 +105,9 @@ export default function ThemeDemoPage() {
               <div className="icon-wrap mb-4">
                 <span className="text-2xl">📊</span>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Analytics</h3>
+              <h3 className="text-xl font-semibold mb-2">Patient Insights</h3>
               <p className="text-muted-foreground">
-                Track your metrics with beautiful visualizations.
+                Track clinic performance with cleaner, calmer visual emphasis.
               </p>
             </div>
 
@@ -115,9 +115,9 @@ export default function ThemeDemoPage() {
               <div className="icon-wrap mb-4">
                 <span className="text-2xl">🎨</span>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Design</h3>
+              <h3 className="text-xl font-semibold mb-2">Care Experience</h3>
               <p className="text-muted-foreground">
-                Create stunning designs with our tools.
+                Present workflows with a more polished and trustworthy visual system.
               </p>
             </div>
 
@@ -125,9 +125,9 @@ export default function ThemeDemoPage() {
               <div className="icon-wrap mb-4">
                 <span className="text-2xl">⚡</span>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Performance</h3>
+              <h3 className="text-xl font-semibold mb-2">Operations</h3>
               <p className="text-muted-foreground">
-                Lightning fast performance for all users.
+                Keep scheduling, staffing, and reporting surfaces visually distinct and clear.
               </p>
             </div>
           </div>
@@ -178,11 +178,11 @@ export default function ThemeDemoPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="hero-gradient rounded-2xl p-12 text-center text-white">
               <h3 className="text-2xl font-bold mb-2">Hero Gradient</h3>
-              <p className="opacity-90">Perfect for hero sections</p>
+              <p className="opacity-90">Ideal for strong landing headers and product highlights</p>
             </div>
             <div className="surface-gradient rounded-2xl p-12 text-center border">
               <h3 className="text-2xl font-bold mb-2">Surface Gradient</h3>
-              <p className="text-muted-foreground">Great for cards and sections</p>
+              <p className="text-muted-foreground">Subtle depth for dashboards, cards, and sections</p>
             </div>
           </div>
         </section>
@@ -194,9 +194,8 @@ export default function ThemeDemoPage() {
             <div className="glass-card rounded-xl p-8 max-w-2xl mx-auto">
               <h3 className="text-2xl font-bold mb-4">Glass Card Effect</h3>
               <p className="text-muted-foreground">
-                This card uses a glass morphism effect with backdrop blur. 
-                It creates a beautiful frosted glass appearance that works 
-                perfectly with gradient backgrounds.
+                This card uses a glass morphism effect with backdrop blur.
+                It creates a frosted surface that pairs cleanly with both the Lagoon and Sunset themes.
               </p>
             </div>
           </div>

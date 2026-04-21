@@ -4,17 +4,17 @@ This project now supports multiple beautiful themes that you can switch between 
 
 ## Available Themes
 
-### ✨ Aurora Theme
-- **Primary Color:** Violet (`#7c3aed`)
-- **Secondary Color:** Pink (`#ec4899`)
-- **Accent Color:** Amber (`#f59e0b`)
-- Perfect for premium dashboards, modern brands, and bold product experiences
+### 🌊 Lagoon Theme
+- **Primary Color:** Teal (`#0f766e`)
+- **Secondary Color:** Sky (`#0ea5e9`)
+- **Accent Color:** Gold (`#eab308`)
+- Perfect for healthcare dashboards, calm interfaces, and trustworthy product experiences
 
-### 🔥 Ember Theme
-- **Primary Color:** Orange (`#f97316`)
-- **Secondary Color:** Gold (`#f59e0b`)
-- **Accent Color:** Plum (`#a855f7`)
-- Perfect for energetic marketing pages, hospitality, and warm product aesthetics
+### 🌇 Sunset Theme
+- **Primary Color:** Rose (`#be185d`)
+- **Secondary Color:** Orange (`#f97316`)
+- **Accent Color:** Blue (`#3b82f6`)
+- Perfect for high-energy marketing pages, bold campaigns, and warmer visual storytelling
 
 ## How to Use Themes
 
@@ -38,11 +38,11 @@ export default function MyPage() {
 Add the theme class to your HTML element:
 
 ```tsx
-// Switch to Ember theme
+// Switch to Sunset theme
 document.documentElement.classList.add('ocean');
 document.documentElement.classList.remove('default');
 
-// Switch to Aurora theme
+// Switch to Lagoon theme
 document.documentElement.classList.add('default');
 document.documentElement.classList.remove('ocean');
 
@@ -54,28 +54,28 @@ document.documentElement.classList.toggle('dark');
 Use the theme-specific color classes:
 
 ```tsx
-// Ember theme colors
+// Sunset theme colors
 <div className="bg-primary_ocean-500 text-white">
-  This uses the Ember primary color
+  This uses the Sunset primary color
 </div>
 
-// Aurora theme colors
+// Lagoon theme colors
 <div className="bg-primary-500 text-white">
-  This uses the Aurora primary color
+  This uses the Lagoon primary color
 </div>
 ```
 
 ## Theme Color Palettes
 
-### Aurora Theme Colors
-- **Primary 500:** `#7c3aed` (Violet)
-- **Secondary 500:** `#ec4899` (Pink)
-- **Accent 500:** `#f59e0b` (Amber)
+### Lagoon Theme Colors
+- **Primary 500:** `#14b8a6` (Teal)
+- **Secondary 500:** `#0ea5e9` (Sky)
+- **Accent 500:** `#eab308` (Gold)
 
-### Ember Theme Colors
-- **Primary 500:** `#f97316` (Orange)
-- **Secondary 500:** `#f59e0b` (Gold)
-- **Accent 500:** `#a855f7` (Plum)
+### Sunset Theme Colors
+- **Primary 500:** `#f43f5e` (Rose)
+- **Secondary 500:** `#f97316` (Orange)
+- **Accent 500:** `#3b82f6` (Blue)
 
 ## CSS Variables
 
@@ -106,6 +106,8 @@ Each theme uses CSS variables for consistent styling:
 --shadow-soft
 --shadow-medium
 --shadow-strong
+--button-shadow
+--button-shadow-hover
 ```
 
 ## Component Classes
@@ -170,16 +172,16 @@ Each theme uses CSS variables for consistent styling:
 Both themes support dark mode. Combine the `dark` class with any theme:
 
 ```tsx
-// Light Ember
+// Light Sunset
 document.documentElement.classList.add('ocean');
 
-// Dark Ember
+// Dark Sunset
 document.documentElement.classList.add('ocean', 'dark');
 
-// Light Aurora
+// Light Lagoon
 document.documentElement.classList.remove('ocean');
 
-// Dark Aurora
+// Dark Lagoon
 document.documentElement.classList.remove('ocean');
 document.documentElement.classList.add('dark');
 ```
@@ -198,7 +200,7 @@ Visit `/theme-demo` to see a comprehensive showcase of all theme features includ
 ## Theme Switcher Features
 
 The `ThemeSwitcher` component provides:
-- One-click theme switching between Aurora and Ember themes
+- One-click theme switching between Lagoon and Sunset themes
 - Dark mode toggle
 - Local storage persistence (remembers your choice)
 - Visual feedback on active theme
@@ -231,7 +233,7 @@ primary_custom: {
 3. **Update ThemeSwitcher component:**
 ```tsx
 const [theme, setTheme] = useState<Theme>('default' | 'ocean' | 'custom');
-/* 'default' now represents Aurora and 'ocean' now represents Ember */
+/* 'default' maps to Lagoon and 'ocean' maps to Sunset */
 ```
 
 ## Best Practices
@@ -254,10 +256,10 @@ These features are supported in all modern browsers.
 
 ## Accessibility
 
-All themes meet WCAG AA standards for color contrast:
-- Normal text: 4.5:1 contrast ratio
-- Large text: 3:1 contrast ratio
-- UI components: 3:1 contrast ratio
+All themes are designed to preserve strong contrast across interface surfaces:
+- Normal text: target 4.5:1 contrast ratio
+- Large text: target 3:1 contrast ratio
+- UI components: target 3:1 contrast ratio
 
 ## Questions?
 
