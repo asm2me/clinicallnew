@@ -32,14 +32,14 @@ function getParamValue(value: string | string[] | undefined) {
 
 function buttonClassName(variant: 'primary' | 'secondary' | 'danger' = 'primary') {
   if (variant === 'secondary') {
-    return 'inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50';
+    return 'inline-flex items-center justify-center rounded-xl border border-border/70 bg-card/90 px-3 py-2 text-sm font-medium text-foreground transition hover:bg-accent hover:text-foreground';
   }
 
   if (variant === 'danger') {
-    return 'inline-flex items-center justify-center rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 transition hover:bg-red-100';
+    return 'inline-flex items-center justify-center rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm font-medium text-red-100 transition hover:bg-red-500/15';
   }
 
-  return 'inline-flex items-center justify-center rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-slate-700';
+  return 'inline-flex items-center justify-center rounded-xl bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-95';
 }
 
 function statusTooltip(action: string, subject: string) {
@@ -63,34 +63,34 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
     >
       <div className="space-y-6">
         {message ? (
-          <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
             {message}
           </div>
         ) : null}
 
         {error ? (
-          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
             {error}
           </div>
         ) : null}
 
         <section className="grid gap-4 lg:grid-cols-3">
           <div className="odoo-kpi">
-            <p className="text-sm text-slate-500">Role</p>
-            <p className="mt-2 text-2xl font-semibold text-slate-900">{data.profile.role}</p>
-            <p className="mt-2 text-sm text-slate-500">Your permissions follow this assigned role.</p>
+            <p className="text-sm text-muted-foreground">Role</p>
+            <p className="mt-2 text-2xl font-semibold text-foreground">{data.profile.role}</p>
+            <p className="mt-2 text-sm text-muted-foreground">Your permissions follow this assigned role.</p>
           </div>
 
           <div className="odoo-kpi">
-            <p className="text-sm text-slate-500">Notifications</p>
-            <p className="mt-2 text-base font-semibold text-slate-900">{data.preferences.notifications}</p>
-            <p className="mt-2 text-sm text-slate-500">Preferences remain aligned with your operational scope.</p>
+            <p className="text-sm text-muted-foreground">Notifications</p>
+            <p className="mt-2 text-base font-semibold text-foreground">{data.preferences.notifications}</p>
+            <p className="mt-2 text-sm text-muted-foreground">Preferences remain aligned with your operational scope.</p>
           </div>
 
           <div className="odoo-kpi">
-            <p className="text-sm text-slate-500">Clinic settings</p>
-            <p className="mt-2 text-base font-semibold text-slate-900">{data.preferences.booking}</p>
-            <p className="mt-2 text-sm text-slate-500">{data.preferences.timezone}</p>
+            <p className="text-sm text-muted-foreground">Clinic settings</p>
+            <p className="mt-2 text-base font-semibold text-foreground">{data.preferences.booking}</p>
+            <p className="mt-2 text-sm text-muted-foreground">{data.preferences.timezone}</p>
           </div>
         </section>
 
@@ -99,8 +99,8 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
             {data.profile.role === 'SUPER_ADMIN' ? (
               <div className="odoo-panel space-y-4">
                 <div>
-                  <h2 className="text-lg font-semibold text-slate-900">Create tenant</h2>
-                  <p className="text-sm text-slate-500">
+                  <h2 className="text-lg font-semibold text-foreground">Create tenant</h2>
+                  <p className="text-sm text-muted-foreground">
                     Create a new tenant workspace for a clinic organization.
                   </p>
                 </div>
@@ -115,17 +115,17 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                     <form action={createTenantAction} className="space-y-4">
                       <CrudFormGrid>
                         <label className="space-y-2">
-                          <span className="text-sm font-medium text-slate-700">Tenant name</span>
+                          <span className="text-sm font-medium text-foreground/90">Tenant name</span>
                           <input className={crudInputClassName()} name="name" required type="text" />
                         </label>
 
                         <label className="space-y-2">
-                          <span className="text-sm font-medium text-slate-700">Slug</span>
+                          <span className="text-sm font-medium text-foreground/90">Slug</span>
                           <input className={crudInputClassName()} name="slug" required type="text" />
                         </label>
 
                         <label className="space-y-2">
-                          <span className="text-sm font-medium text-slate-700">Status</span>
+                          <span className="text-sm font-medium text-foreground/90">Status</span>
                           <select
                             className={crudSelectClassName()}
                             defaultValue="TRIALING"
@@ -141,22 +141,22 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                         </label>
 
                         <label className="space-y-2">
-                          <span className="text-sm font-medium text-slate-700">Website name</span>
+                          <span className="text-sm font-medium text-foreground/90">Website name</span>
                           <input className={crudInputClassName()} name="websiteName" type="text" />
                         </label>
 
                         <label className="space-y-2">
-                          <span className="text-sm font-medium text-slate-700">Support email</span>
+                          <span className="text-sm font-medium text-foreground/90">Support email</span>
                           <input className={crudInputClassName()} name="supportEmail" type="email" />
                         </label>
 
                         <label className="space-y-2">
-                          <span className="text-sm font-medium text-slate-700">Support phone</span>
+                          <span className="text-sm font-medium text-foreground/90">Support phone</span>
                           <input className={crudInputClassName()} name="supportPhone" type="tel" />
                         </label>
 
                         <label className="space-y-2">
-                          <span className="text-sm font-medium text-slate-700">Timezone</span>
+                          <span className="text-sm font-medium text-foreground/90">Timezone</span>
                           <input
                             className={crudInputClassName()}
                             defaultValue="UTC"
@@ -167,7 +167,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                         </label>
 
                         <label className="space-y-2">
-                          <span className="text-sm font-medium text-slate-700">Locale</span>
+                          <span className="text-sm font-medium text-foreground/90">Locale</span>
                           <input
                             className={crudInputClassName()}
                             defaultValue="en"
@@ -178,37 +178,37 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                         </label>
 
                         <label className="space-y-2">
-                          <span className="text-sm font-medium text-slate-700">Subscription plan</span>
+                          <span className="text-sm font-medium text-foreground/90">Subscription plan</span>
                           <input className={crudInputClassName()} name="subscriptionPlan" type="text" />
                         </label>
 
                         <label className="space-y-2 md:col-span-2 xl:col-span-3">
-                          <span className="text-sm font-medium text-slate-700">Subscription status</span>
+                          <span className="text-sm font-medium text-foreground/90">Subscription status</span>
                           <input className={crudInputClassName()} name="subscriptionStatus" type="text" />
                         </label>
                       </CrudFormGrid>
 
-                      <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                      <div className="rounded-2xl border border-border/70 bg-card/70 p-4">
                         <div className="mb-4">
-                          <h3 className="text-sm font-semibold text-slate-900">Initial tenant admin (optional)</h3>
-                          <p className="text-sm text-slate-500">
+                          <h3 className="text-sm font-semibold text-foreground">Initial tenant admin (optional)</h3>
+                          <p className="text-sm text-muted-foreground">
                             Create the first tenant administrator together with the tenant workspace.
                           </p>
                         </div>
 
                         <CrudFormGrid>
                           <label className="space-y-2">
-                            <span className="text-sm font-medium text-slate-700">Admin name</span>
+                            <span className="text-sm font-medium text-foreground/90">Admin name</span>
                             <input className={crudInputClassName()} name="tenantAdminName" type="text" />
                           </label>
 
                           <label className="space-y-2">
-                            <span className="text-sm font-medium text-slate-700">Admin email</span>
+                            <span className="text-sm font-medium text-foreground/90">Admin email</span>
                             <input className={crudInputClassName()} name="tenantAdminEmail" type="email" />
                           </label>
 
                           <label className="space-y-2">
-                            <span className="text-sm font-medium text-slate-700">Admin password</span>
+                            <span className="text-sm font-medium text-foreground/90">Admin password</span>
                             <input
                               className={crudInputClassName()}
                               minLength={6}
@@ -237,32 +237,32 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
             <section id="tenant-management" className="odoo-panel space-y-4">
               <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold text-slate-900">Tenant management</h2>
-                  <p className="text-sm text-slate-500">
+                  <h2 className="text-lg font-semibold text-foreground">Tenant management</h2>
+                  <p className="text-sm text-muted-foreground">
                     {data.profile.role === 'SUPER_ADMIN'
                       ? 'Review tenant workspaces, usage, and subscription metadata.'
                       : 'Review and update your tenant workspace settings.'}
                   </p>
                 </div>
 
-                <span className="text-sm text-slate-500">
+                <span className="text-sm text-muted-foreground">
                   {data.tenants.length} tenant{data.tenants.length === 1 ? '' : 's'} configured
                 </span>
               </div>
 
               <div className="grid gap-4">
                 {data.tenants.map((tenant) => (
-                  <div key={tenant.id} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                  <div key={tenant.id} className="rounded-[1.75rem] border border-border/70 bg-card/90 p-4 shadow-sm">
                     <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                       <div>
-                        <div className="font-medium text-slate-900">{tenant.name}</div>
-                        <div className="text-sm text-slate-500">
+                        <div className="font-medium text-foreground">{tenant.name}</div>
+                        <div className="text-sm text-muted-foreground">
                           {tenant.slug} · {tenant.status}
                         </div>
                       </div>
 
                       <div className="flex flex-col items-start gap-3 md:items-end">
-                        <div className="flex flex-wrap gap-2 text-xs text-slate-500 md:justify-end">
+                        <div className="flex flex-wrap gap-2 text-xs text-muted-foreground md:justify-end">
                           <span className="odoo-badge">{tenant.clinicCount} clinics</span>
                           <span className="odoo-badge">{tenant.userCount} users</span>
                           <span className="odoo-badge">{tenant.patientCount} patients</span>
@@ -280,7 +280,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
 
                             <CrudFormGrid>
                               <label className="space-y-2">
-                                <span className="text-sm font-medium text-slate-700">Tenant name</span>
+                                <span className="text-sm font-medium text-foreground/90">Tenant name</span>
                                 <input
                                   className={crudInputClassName()}
                                   defaultValue={tenant.name}
@@ -291,7 +291,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                               </label>
 
                               <label className="space-y-2">
-                                <span className="text-sm font-medium text-slate-700">Slug</span>
+                                <span className="text-sm font-medium text-foreground/90">Slug</span>
                                 <input
                                   className={crudInputClassName()}
                                   defaultValue={tenant.slug}
@@ -302,7 +302,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                               </label>
 
                               <label className="space-y-2">
-                                <span className="text-sm font-medium text-slate-700">Status</span>
+                                <span className="text-sm font-medium text-foreground/90">Status</span>
                                 <select
                                   className={crudSelectClassName()}
                                   defaultValue={tenant.status}
@@ -318,7 +318,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                               </label>
 
                               <label className="space-y-2">
-                                <span className="text-sm font-medium text-slate-700">Website name</span>
+                                <span className="text-sm font-medium text-foreground/90">Website name</span>
                                 <input
                                   className={crudInputClassName()}
                                   defaultValue={tenant.websiteName ?? ''}
@@ -328,7 +328,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                               </label>
 
                               <label className="space-y-2">
-                                <span className="text-sm font-medium text-slate-700">Support email</span>
+                                <span className="text-sm font-medium text-foreground/90">Support email</span>
                                 <input
                                   className={crudInputClassName()}
                                   defaultValue={tenant.supportEmail ?? ''}
@@ -338,7 +338,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                               </label>
 
                               <label className="space-y-2">
-                                <span className="text-sm font-medium text-slate-700">Support phone</span>
+                                <span className="text-sm font-medium text-foreground/90">Support phone</span>
                                 <input
                                   className={crudInputClassName()}
                                   defaultValue={tenant.supportPhone ?? ''}
@@ -348,7 +348,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                               </label>
 
                               <label className="space-y-2">
-                                <span className="text-sm font-medium text-slate-700">Timezone</span>
+                                <span className="text-sm font-medium text-foreground/90">Timezone</span>
                                 <input
                                   className={crudInputClassName()}
                                   defaultValue={tenant.timezone}
@@ -359,7 +359,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                               </label>
 
                               <label className="space-y-2">
-                                <span className="text-sm font-medium text-slate-700">Locale</span>
+                                <span className="text-sm font-medium text-foreground/90">Locale</span>
                                 <input
                                   className={crudInputClassName()}
                                   defaultValue={tenant.locale}
@@ -370,7 +370,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                               </label>
 
                               <label className="space-y-2">
-                                <span className="text-sm font-medium text-slate-700">Subscription plan</span>
+                                <span className="text-sm font-medium text-foreground/90">Subscription plan</span>
                                 <input
                                   className={crudInputClassName()}
                                   defaultValue={tenant.subscriptionPlan ?? ''}
@@ -380,7 +380,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                               </label>
 
                               <label className="space-y-2 md:col-span-2 xl:col-span-3">
-                                <span className="text-sm font-medium text-slate-700">Subscription status</span>
+                                <span className="text-sm font-medium text-foreground/90">Subscription status</span>
                                 <input
                                   className={crudInputClassName()}
                                   defaultValue={tenant.subscriptionStatus ?? ''}
@@ -405,21 +405,21 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                     </div>
 
                     {data.profile.role === 'SUPER_ADMIN' ? (
-                      <details className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 md:max-w-md">
-                        <summary className="cursor-pointer list-none text-sm font-medium text-red-700">
+                      <details className="mt-4 rounded-2xl border border-red-500/30 bg-red-500/10 p-3 md:max-w-md">
+                        <summary className="cursor-pointer list-none text-sm font-medium text-red-100">
                           Delete tenant
                         </summary>
 
                         <form action={deleteTenantAction} className="mt-4 grid gap-3">
                           <input name="tenantId" type="hidden" value={tenant.id} />
 
-                          <div className="rounded-md border border-red-200 bg-white px-3 py-2 text-xs text-red-700">
+                          <div className="rounded-xl border border-red-500/30 bg-black/20 px-3 py-2 text-xs text-red-100">
                             This permanently deletes the tenant and its scoped records. Type{' '}
                             <span className="font-semibold">{tenant.slug}</span> to confirm.
                           </div>
 
                           <label className="space-y-1">
-                            <span className="text-xs font-medium uppercase tracking-wide text-red-700">
+                            <span className="text-xs font-medium uppercase tracking-wide text-red-100">
                               Confirmation
                             </span>
                             <input
@@ -447,7 +447,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                 ))}
 
                 {data.tenants.length === 0 ? (
-                  <div className="rounded-lg border border-dashed border-slate-300 px-4 py-6 text-center text-sm text-slate-500">
+                  <div className="rounded-2xl border border-dashed border-border/70 bg-card/50 px-4 py-6 text-center text-sm text-muted-foreground">
                     No tenants have been created yet.
                   </div>
                 ) : null}
