@@ -4,29 +4,36 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import type { AppRole } from "@/lib/auth";
+import { canAccessDashboardSection, type DashboardSection } from "@/lib/permissions";
+
 type NavItem = {
   label: string;
   href: string;
-  roles?: string[];
+  section: DashboardSection;
 };
 
 const navItems: NavItem[] = [
-  { label: 'Overview', href: '/dashboard' },
-  { label: 'Appointments', href: '/dashboard/appointments' },
-  { label: 'Patients', href: '/dashboard/patients' },
-  { label: 'Clinics', href: '/dashboard/clinics' },
-  { label: 'Users', href: '/dashboard/users', roles: ['SUPER_ADMIN', 'TENANT_ADMIN'] },
-  { label: 'Analytics', href: '/dashboard/analytics' },
+  { label: 'Overview', href: '/dashboard', section: 'overview' },
+  { label: 'Appointments', href: '/dashboard/appointments', section: 'appointments' },
+  { label: 'Patients', href: '/dashboard/patients', section: 'patients' },
+  { label: 'Clinics', href: '/dashboard/clinics', section: 'clinics' },
+  { label: 'Users', href: '/dashboard/users', section: 'users' },
+  {
+    label: 'Analytics',
+    href: '/dashboard/analytics',
+    section: 'analytics',
+  },
   {
     label: 'Tenants',
     href: '/dashboard/settings#tenant-management',
-    roles: ['SUPER_ADMIN'],
+    section: 'tenants',
   },
-  { label: 'Settings', href: '/dashboard/settings' },
+  { label: 'Settings', href: '/dashboard/settings', section: 'settings' },
 ];
 
 export interface DashboardNavProps {
-  role: string;
+  role: AppRole;
 }
 
 function navMeta(item: NavItem) {
@@ -65,7 +72,7 @@ export function DashboardNav({ role }: DashboardNavProps) {
     return () => window.removeEventListener('hashchange', syncHash);
   }, []);
 
-  const visibleItems = navItems.filter((item) => !item.roles || item.roles.includes(role));
+  const visibleItems = navItems.filter((item) => canAccessDashboardSection(role, item.section));
 
   return (
     <nav aria-label="Dashboard navigation" className="space-y-4">

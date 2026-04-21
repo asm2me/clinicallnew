@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 
 import { DashboardShell } from '@/components/dashboard/shell';
-import { authOptions } from '@/lib/auth';
+import { authOptions, type AppRole } from '@/lib/auth';
 import { getDashboardData } from '@/lib/queries/dashboard';
 import { statusBadge } from '@/lib/status-badge';
 
@@ -25,7 +25,7 @@ export default async function DashboardPage() {
     redirect('/login');
   }
 
-  const role = session.user.role as string;
+  const role = session.user.role as AppRole;
   const data = await getDashboardData({
     userId: session.user.id,
     role,

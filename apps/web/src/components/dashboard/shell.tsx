@@ -4,12 +4,13 @@ import Link from "next/link";
 import { SignOutButton } from '@/components/auth/sign-out-button';
 import { stopUserImpersonationAction } from '@/app/dashboard/users/impersonation-actions';
 import { DashboardNav } from '@/components/dashboard/nav';
+import type { AppRole } from '@/lib/auth';
 import { getEffectiveDashboardUser } from '@/lib/impersonation';
 
 export interface DashboardShellProps {
   title?: string;
   description?: string;
-  role: string;
+  role: AppRole;
   children: ReactNode;
 }
 
