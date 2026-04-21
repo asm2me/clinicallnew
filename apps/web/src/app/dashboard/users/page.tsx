@@ -1,5 +1,13 @@
 import { redirect } from 'next/navigation';
 
+import {
+  CrudFormActions,
+  CrudFormGrid,
+  CrudFormModal,
+  crudInputClassName,
+  crudPopupTriggerClassName,
+  crudSelectClassName,
+} from '@/components/dashboard/crud-form-template';
 import { DashboardShell } from '@/components/dashboard/shell';
 import { getUsersPageData } from '@/lib/queries/users';
 
@@ -36,14 +44,6 @@ function buttonClassName(variant: 'primary' | 'secondary' | 'danger' | 'warning'
   }
 
   return 'inline-flex items-center justify-center rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-slate-700';
-}
-
-function inputClassName() {
-  return 'w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200';
-}
-
-function selectClassName() {
-  return inputClassName();
 }
 
 function statusTooltip(action: string, subject: string) {
@@ -86,87 +86,109 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
         ) : (
           <>
             <section className="odoo-panel space-y-4">
-              <div>
-                <h2 className="text-lg font-semibold text-slate-900">Create user</h2>
-                <p className="text-sm text-slate-500">
-                  Add a new dashboard user within your permitted scope.
-                </p>
-              </div>
-
-              <form action={createUserAction} className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                <label className="space-y-2">
-                  <span className="text-sm font-medium text-slate-700">Name</span>
-                  <input className={inputClassName()} name="name" required type="text" />
-                </label>
-
-                <label className="space-y-2">
-                  <span className="text-sm font-medium text-slate-700">Email</span>
-                  <input className={inputClassName()} name="email" required type="email" />
-                </label>
-
-                <label className="space-y-2">
-                  <span className="text-sm font-medium text-slate-700">Password</span>
-                  <input className={inputClassName()} minLength={6} name="password" required type="password" />
-                </label>
-
-                <label className="space-y-2">
-                  <span className="text-sm font-medium text-slate-700">Role</span>
-                  <select className={selectClassName()} defaultValue={data.roleOptions[0]} name="role" required>
-                    {data.roleOptions.map((role) => (
-                      <option key={role} value={role}>
-                        {role}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                {data.actor.role === 'SUPER_ADMIN' ? (
-                  <label className="space-y-2">
-                    <span className="text-sm font-medium text-slate-700">Tenant</span>
-                    <select className={selectClassName()} defaultValue="" name="tenantId">
-                      <option value="">Select tenant</option>
-                      {data.tenants.map((tenant) => (
-                        <option key={tenant.id} value={tenant.id}>
-                          {tenant.name}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                ) : null}
-
-                <label className="space-y-2">
-                  <span className="text-sm font-medium text-slate-700">Clinic</span>
-                  <select className={selectClassName()} defaultValue="" name="clinicId">
-                    <option value="">No clinic assignment</option>
-                    {data.clinics.map((clinic) => (
-                      <option key={clinic.id} value={clinic.id}>
-                        {clinic.name}
-                        {clinic.tenant?.name ? ` — ${clinic.tenant.name}` : ''}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="space-y-2">
-                  <span className="text-sm font-medium text-slate-700">Phone</span>
-                  <input className={inputClassName()} name="phone" type="tel" />
-                </label>
-
-                <label className="space-y-2">
-                  <span className="text-sm font-medium text-slate-700">Title</span>
-                  <input className={inputClassName()} name="title" type="text" />
-                </label>
-
-                <div className="md:col-span-2 xl:col-span-3 flex justify-end">
-                  <button
-                    className={buttonClassName()}
-                    title={statusTooltip('Create', 'a user')}
-                    type="submit"
-                  >
-                    Create user
-                  </button>
+              <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold text-slate-900">Create user</h2>
+                  <p className="text-sm text-slate-500">
+                    Add a new dashboard user within your permitted scope.
+                  </p>
                 </div>
-              </form>
+
+                <CrudFormModal
+                  title="Create user"
+                  description="Add a new dashboard user within your permitted scope."
+                  triggerLabel="Create user"
+                  triggerClassName={crudPopupTriggerClassName()}
+                >
+                  <form action={createUserAction} className="space-y-4">
+                    <CrudFormGrid>
+                      <label className="space-y-2">
+                        <span className="text-sm font-medium text-slate-700">Name</span>
+                        <input className={crudInputClassName()} name="name" required type="text" />
+                      </label>
+
+                      <label className="space-y-2">
+                        <span className="text-sm font-medium text-slate-700">Email</span>
+                        <input className={crudInputClassName()} name="email" required type="email" />
+                      </label>
+
+                      <label className="space-y-2">
+                        <span className="text-sm font-medium text-slate-700">Password</span>
+                        <input
+                          className={crudInputClassName()}
+                          minLength={6}
+                          name="password"
+                          required
+                          type="password"
+                        />
+                      </label>
+
+                      <label className="space-y-2">
+                        <span className="text-sm font-medium text-slate-700">Role</span>
+                        <select
+                          className={crudSelectClassName()}
+                          defaultValue={data.roleOptions[0]}
+                          name="role"
+                          required
+                        >
+                          {data.roleOptions.map((role) => (
+                            <option key={role} value={role}>
+                              {role}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+
+                      {data.actor.role === 'SUPER_ADMIN' ? (
+                        <label className="space-y-2">
+                          <span className="text-sm font-medium text-slate-700">Tenant</span>
+                          <select className={crudSelectClassName()} defaultValue="" name="tenantId">
+                            <option value="">Select tenant</option>
+                            {data.tenants.map((tenant) => (
+                              <option key={tenant.id} value={tenant.id}>
+                                {tenant.name}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                      ) : null}
+
+                      <label className="space-y-2">
+                        <span className="text-sm font-medium text-slate-700">Clinic</span>
+                        <select className={crudSelectClassName()} defaultValue="" name="clinicId">
+                          <option value="">No clinic assignment</option>
+                          {data.clinics.map((clinic) => (
+                            <option key={clinic.id} value={clinic.id}>
+                              {clinic.name}
+                              {clinic.tenant?.name ? ` — ${clinic.tenant.name}` : ''}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+
+                      <label className="space-y-2">
+                        <span className="text-sm font-medium text-slate-700">Phone</span>
+                        <input className={crudInputClassName()} name="phone" type="tel" />
+                      </label>
+
+                      <label className="space-y-2">
+                        <span className="text-sm font-medium text-slate-700">Title</span>
+                        <input className={crudInputClassName()} name="title" type="text" />
+                      </label>
+                    </CrudFormGrid>
+
+                    <CrudFormActions>
+                      <button
+                        className={buttonClassName()}
+                        title={statusTooltip('Create', 'a user')}
+                        type="submit"
+                      >
+                        Create user
+                      </button>
+                    </CrudFormActions>
+                  </form>
+                </CrudFormModal>
+              </div>
             </section>
 
             <section className="odoo-panel space-y-4">
@@ -235,135 +257,138 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
                                 </form>
                               ) : null}
 
-                              <details className="w-full rounded-lg border border-slate-200 bg-slate-50 p-3">
-                                <summary className="cursor-pointer list-none text-sm font-medium text-slate-700">
-                                  Edit user
-                                </summary>
-
-                                <form action={updateUserAction} className="mt-4 grid gap-3">
+                              <CrudFormModal
+                                title={`Edit ${user.name}`}
+                                description="Update the user's account details, role, scope assignments, and optional password."
+                                triggerLabel="Edit user"
+                                triggerClassName={crudPopupTriggerClassName('secondary')}
+                              >
+                                <form action={updateUserAction} className="space-y-4">
                                   <input name="userId" type="hidden" value={user.id} />
 
-                                  <label className="space-y-1">
-                                    <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                                      Name
-                                    </span>
-                                    <input
-                                      className={inputClassName()}
-                                      defaultValue={user.name}
-                                      name="name"
-                                      required
-                                      type="text"
-                                    />
-                                  </label>
-
-                                  <label className="space-y-1">
-                                    <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                                      Email
-                                    </span>
-                                    <input
-                                      className={inputClassName()}
-                                      defaultValue={user.email}
-                                      name="email"
-                                      required
-                                      type="email"
-                                    />
-                                  </label>
-
-                                  <label className="space-y-1">
-                                    <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                                      Role
-                                    </span>
-                                    <select
-                                      className={selectClassName()}
-                                      defaultValue={user.role}
-                                      name="role"
-                                      required
-                                    >
-                                      {rowRoleOptions.map((role) => (
-                                        <option key={role} value={role}>
-                                          {role}
-                                        </option>
-                                      ))}
-                                    </select>
-                                  </label>
-
-                                  {data.actor.role === 'SUPER_ADMIN' ? (
+                                  <CrudFormGrid className="grid gap-3 md:grid-cols-2">
                                     <label className="space-y-1">
                                       <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                                        Tenant
+                                        Name
+                                      </span>
+                                      <input
+                                        className={crudInputClassName()}
+                                        defaultValue={user.name}
+                                        name="name"
+                                        required
+                                        type="text"
+                                      />
+                                    </label>
+
+                                    <label className="space-y-1">
+                                      <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                                        Email
+                                      </span>
+                                      <input
+                                        className={crudInputClassName()}
+                                        defaultValue={user.email}
+                                        name="email"
+                                        required
+                                        type="email"
+                                      />
+                                    </label>
+
+                                    <label className="space-y-1">
+                                      <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                                        Role
                                       </span>
                                       <select
-                                        className={selectClassName()}
-                                        defaultValue={user.tenantId ?? ''}
-                                        name="tenantId"
+                                        className={crudSelectClassName()}
+                                        defaultValue={user.role}
+                                        name="role"
+                                        required
                                       >
-                                        <option value="">Select tenant</option>
-                                        {data.tenants.map((tenant) => (
-                                          <option key={tenant.id} value={tenant.id}>
-                                            {tenant.name}
+                                        {rowRoleOptions.map((role) => (
+                                          <option key={role} value={role}>
+                                            {role}
                                           </option>
                                         ))}
                                       </select>
                                     </label>
-                                  ) : null}
 
-                                  <label className="space-y-1">
-                                    <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                                      Clinic
-                                    </span>
-                                    <select
-                                      className={selectClassName()}
-                                      defaultValue={user.clinicId ?? ''}
-                                      name="clinicId"
-                                    >
-                                      <option value="">No clinic assignment</option>
-                                      {data.clinics.map((clinic) => (
-                                        <option key={clinic.id} value={clinic.id}>
-                                          {clinic.name}
-                                          {clinic.tenant?.name ? ` — ${clinic.tenant.name}` : ''}
-                                        </option>
-                                      ))}
-                                    </select>
-                                  </label>
+                                    {data.actor.role === 'SUPER_ADMIN' ? (
+                                      <label className="space-y-1">
+                                        <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                                          Tenant
+                                        </span>
+                                        <select
+                                          className={crudSelectClassName()}
+                                          defaultValue={user.tenantId ?? ''}
+                                          name="tenantId"
+                                        >
+                                          <option value="">Select tenant</option>
+                                          {data.tenants.map((tenant) => (
+                                            <option key={tenant.id} value={tenant.id}>
+                                              {tenant.name}
+                                            </option>
+                                          ))}
+                                        </select>
+                                      </label>
+                                    ) : null}
 
-                                  <label className="space-y-1">
-                                    <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                                      Phone
-                                    </span>
-                                    <input
-                                      className={inputClassName()}
-                                      defaultValue={user.phone ?? ''}
-                                      name="phone"
-                                      type="tel"
-                                    />
-                                  </label>
+                                    <label className="space-y-1">
+                                      <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                                        Clinic
+                                      </span>
+                                      <select
+                                        className={crudSelectClassName()}
+                                        defaultValue={user.clinicId ?? ''}
+                                        name="clinicId"
+                                      >
+                                        <option value="">No clinic assignment</option>
+                                        {data.clinics.map((clinic) => (
+                                          <option key={clinic.id} value={clinic.id}>
+                                            {clinic.name}
+                                            {clinic.tenant?.name ? ` — ${clinic.tenant.name}` : ''}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    </label>
 
-                                  <label className="space-y-1">
-                                    <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                                      Title
-                                    </span>
-                                    <input
-                                      className={inputClassName()}
-                                      defaultValue={user.title ?? ''}
-                                      name="title"
-                                      type="text"
-                                    />
-                                  </label>
+                                    <label className="space-y-1">
+                                      <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                                        Phone
+                                      </span>
+                                      <input
+                                        className={crudInputClassName()}
+                                        defaultValue={user.phone ?? ''}
+                                        name="phone"
+                                        type="tel"
+                                      />
+                                    </label>
 
-                                  <label className="space-y-1">
-                                    <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                                      New password
-                                    </span>
-                                    <input
-                                      className={inputClassName()}
-                                      minLength={6}
-                                      name="password"
-                                      placeholder="Leave blank to keep current password"
-                                      type="password"
-                                    />
-                                  </label>
+                                    <label className="space-y-1">
+                                      <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                                        Title
+                                      </span>
+                                      <input
+                                        className={crudInputClassName()}
+                                        defaultValue={user.title ?? ''}
+                                        name="title"
+                                        type="text"
+                                      />
+                                    </label>
 
-                                  <div className="flex justify-end">
+                                    <label className="space-y-1 md:col-span-2">
+                                      <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                                        New password
+                                      </span>
+                                      <input
+                                        className={crudInputClassName()}
+                                        minLength={6}
+                                        name="password"
+                                        placeholder="Leave blank to keep current password"
+                                        type="password"
+                                      />
+                                    </label>
+                                  </CrudFormGrid>
+
+                                  <CrudFormActions>
                                     <button
                                       className={buttonClassName('secondary')}
                                       title={statusTooltip('Save', 'user changes')}
@@ -371,9 +396,9 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
                                     >
                                       Save changes
                                     </button>
-                                  </div>
+                                  </CrudFormActions>
                                 </form>
-                              </details>
+                              </CrudFormModal>
 
                               {isProtectedSuperAdmin ? (
                                 <div
@@ -401,7 +426,7 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
                                         Confirmation
                                       </span>
                                       <input
-                                        className={inputClassName()}
+                                        className={crudInputClassName()}
                                         name="confirmationText"
                                         placeholder={user.email}
                                         required

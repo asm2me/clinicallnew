@@ -2,6 +2,15 @@ import type { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 
+import {
+  CrudFormActions,
+  CrudFormGrid,
+  CrudFormModal,
+  crudInputClassName,
+  crudPopupTriggerClassName,
+  crudSelectClassName,
+  crudTextAreaClassName,
+} from '@/components/dashboard/crud-form-template';
 import { DashboardShell } from '@/components/dashboard/shell';
 import { authOptions } from '@/lib/auth';
 import { getPatientsData } from '@/lib/queries/patients';
@@ -76,7 +85,7 @@ function FormField({
     <label className="flex flex-col gap-2 text-sm text-slate-600">
       <span className="font-medium text-slate-700">{label}</span>
       <input
-        className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+        className={crudInputClassName()}
         defaultValue={defaultValue ?? ''}
         name={name}
         placeholder={placeholder}
@@ -106,6 +115,7 @@ export default async function PatientsPage({ searchParams }: PatientsPageProps) 
             Manage patient records, clinic assignments, and chart details.
           </p>
         </div>
+
         {searchParams?.message ? <Banner tone="success">{searchParams.message}</Banner> : null}
         {searchParams?.error ? <Banner tone="error">{searchParams.error}</Banner> : null}
 
@@ -130,63 +140,75 @@ export default async function PatientsPage({ searchParams }: PatientsPageProps) 
 
         {data.canMutate ? (
           <section className="odoo-panel space-y-4">
-            <div className="flex flex-col gap-1">
-              <h2 className="text-lg font-semibold text-slate-900">Create patient</h2>
-              <p className="text-sm text-slate-500">
-                Add a new patient record and assign it to a clinic within your allowed scope.
-              </p>
+            <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+              <div className="flex flex-col gap-1">
+                <h2 className="text-lg font-semibold text-slate-900">Create patient</h2>
+                <p className="text-sm text-slate-500">
+                  Add a new patient record and assign it to a clinic within your allowed scope.
+                </p>
+              </div>
+
+              {canCreate ? (
+                <CrudFormModal
+                  title="Create patient"
+                  description="Add a new patient record and assign it to a clinic within your allowed scope."
+                  triggerLabel="Create patient"
+                  triggerClassName={crudPopupTriggerClassName()}
+                >
+                  <form action={createPatientAction} className="space-y-4">
+                    <CrudFormGrid className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                      <FormField label="Patient name" name="name" placeholder="John Doe" required />
+                      <FormField label="MRN" name="mrn" placeholder="MRN-1001" required />
+
+                      <label className="flex flex-col gap-2 text-sm text-slate-600">
+                        <span className="font-medium text-slate-700">Clinic</span>
+                        <select className={crudSelectClassName()} name="clinicId" required>
+                          <option value="">Select clinic</option>
+                          {data.clinicOptions.map((clinic) => (
+                            <option key={clinic.id} value={clinic.id}>
+                              {clinic.name} {clinic.city ? `(${clinic.city})` : ''}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+
+                      <FormField label="Status" name="status" placeholder="ACTIVE" required />
+                      <FormField label="Email" name="email" placeholder="patient@example.com" type="email" />
+                      <FormField label="Phone" name="phone" placeholder="+1 555 0100" />
+                      <FormField label="Team" name="team" placeholder="Care team" />
+                      <FormField label="Gender" name="gender" placeholder="FEMALE" />
+                      <FormField label="Emergency contact" name="emergencyContact" placeholder="Contact name" />
+                      <FormField label="Emergency phone" name="emergencyPhone" placeholder="+1 555 0111" />
+                      <FormField label="Last visit" name="lastVisit" type="date" />
+
+                      <label className="flex flex-col gap-2 text-sm text-slate-600 md:col-span-2 xl:col-span-4">
+                        <span className="font-medium text-slate-700">Notes</span>
+                        <textarea
+                          className={crudTextAreaClassName()}
+                          name="notes"
+                          placeholder="Clinical notes or care context"
+                        />
+                      </label>
+                    </CrudFormGrid>
+
+                    <CrudFormActions>
+                      <button
+                        className="inline-flex items-center rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
+                        type="submit"
+                      >
+                        Create patient
+                      </button>
+                    </CrudFormActions>
+                  </form>
+                </CrudFormModal>
+              ) : null}
             </div>
 
             {!canCreate ? (
               <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
                 You need at least one accessible clinic before creating patients.
               </div>
-            ) : (
-              <form action={createPatientAction} className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                <FormField label="Patient name" name="name" placeholder="John Doe" required />
-                <FormField label="MRN" name="mrn" placeholder="MRN-1001" required />
-                <label className="flex flex-col gap-2 text-sm text-slate-600">
-                  <span className="font-medium text-slate-700">Clinic</span>
-                  <select
-                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
-                    name="clinicId"
-                    required
-                  >
-                    <option value="">Select clinic</option>
-                    {data.clinicOptions.map((clinic) => (
-                      <option key={clinic.id} value={clinic.id}>
-                        {clinic.name} {clinic.city ? `(${clinic.city})` : ''}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <FormField label="Status" name="status" placeholder="ACTIVE" required />
-                <FormField label="Email" name="email" placeholder="patient@example.com" type="email" />
-                <FormField label="Phone" name="phone" placeholder="+1 555 0100" />
-                <FormField label="Team" name="team" placeholder="Care team" />
-                <FormField label="Gender" name="gender" placeholder="FEMALE" />
-                <FormField label="Emergency contact" name="emergencyContact" placeholder="Contact name" />
-                <FormField label="Emergency phone" name="emergencyPhone" placeholder="+1 555 0111" />
-                <FormField label="Last visit" name="lastVisit" type="date" />
-                <label className="flex flex-col gap-2 text-sm text-slate-600 md:col-span-2 xl:col-span-4">
-                  <span className="font-medium text-slate-700">Notes</span>
-                  <textarea
-                    className="min-h-28 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
-                    name="notes"
-                    placeholder="Clinical notes or care context"
-                  />
-                </label>
-
-                <div className="md:col-span-2 xl:col-span-4">
-                  <button
-                    className="inline-flex items-center rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
-                    type="submit"
-                  >
-                    Create patient
-                  </button>
-                </div>
-              </form>
-            )}
+            ) : null}
           </section>
         ) : null}
 
@@ -209,6 +231,7 @@ export default async function PatientsPage({ searchParams }: PatientsPageProps) 
                   <th className="px-4 py-3 font-medium">Actions</th>
                 </tr>
               </thead>
+
               <tbody className="divide-y divide-slate-100">
                 {data.patients.length === 0 ? (
                   <tr>
@@ -236,66 +259,83 @@ export default async function PatientsPage({ searchParams }: PatientsPageProps) 
                       <td className="px-4 py-4">
                         {data.canMutate ? (
                           <div className="flex min-w-[20rem] flex-col gap-3">
-                            <details className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                              <summary className="cursor-pointer list-none text-sm font-medium text-sky-700">
-                                Edit patient
-                              </summary>
-
-                              <form action={updatePatientAction} className="mt-3 grid gap-3">
+                            <CrudFormModal
+                              title={`Edit ${patient.name}`}
+                              description="Update patient demographics, clinic assignment, status, and chart notes."
+                              triggerLabel="Edit patient"
+                              triggerClassName={crudPopupTriggerClassName('secondary')}
+                            >
+                              <form action={updatePatientAction} className="space-y-4">
                                 <input name="id" type="hidden" value={patient.id} />
 
-                                <FormField label="Patient name" name="name" defaultValue={patient.name} required />
-                                <FormField label="MRN" name="mrn" defaultValue={patient.mrn} required />
-                                <label className="flex flex-col gap-2 text-sm text-slate-600">
-                                  <span className="font-medium text-slate-700">Clinic</span>
-                                  <select
-                                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
-                                    defaultValue={patient.clinicId}
-                                    name="clinicId"
-                                    required
-                                  >
-                                    <option value="">Select clinic</option>
-                                    {data.clinicOptions.map((clinic) => (
-                                      <option key={clinic.id} value={clinic.id}>
-                                        {clinic.name} {clinic.city ? `(${clinic.city})` : ''}
-                                      </option>
-                                    ))}
-                                  </select>
-                                </label>
-                                <FormField label="Status" name="status" defaultValue={patient.status} required />
-                                <FormField label="Email" name="email" defaultValue={patient.email} type="email" />
-                                <FormField label="Phone" name="phone" defaultValue={patient.phone} />
-                                <FormField label="Team" name="team" defaultValue={patient.team} />
-                                <FormField label="Gender" name="gender" defaultValue={patient.gender} />
-                                <FormField
-                                  label="Emergency contact"
-                                  name="emergencyContact"
-                                  defaultValue={patient.emergencyContact}
-                                />
-                                <FormField
-                                  label="Emergency phone"
-                                  name="emergencyPhone"
-                                  defaultValue={patient.emergencyPhone}
-                                />
-                                <FormField label="Last visit" name="lastVisit" defaultValue={patient.lastVisitValue} type="date" />
+                                <CrudFormGrid className="grid gap-3 md:grid-cols-2">
+                                  <FormField label="Patient name" name="name" defaultValue={patient.name} required />
+                                  <FormField label="MRN" name="mrn" defaultValue={patient.mrn} required />
 
-                                <label className="flex flex-col gap-2 text-sm text-slate-600">
-                                  <span className="font-medium text-slate-700">Notes</span>
-                                  <textarea
-                                    className="min-h-24 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
-                                    defaultValue={patient.notes ?? ''}
-                                    name="notes"
+                                  <label className="flex flex-col gap-2 text-sm text-slate-600">
+                                    <span className="font-medium text-slate-700">Clinic</span>
+                                    <select
+                                      className={crudSelectClassName()}
+                                      defaultValue={patient.clinicId}
+                                      name="clinicId"
+                                      required
+                                    >
+                                      <option value="">Select clinic</option>
+                                      {data.clinicOptions.map((clinic) => (
+                                        <option key={clinic.id} value={clinic.id}>
+                                          {clinic.name} {clinic.city ? `(${clinic.city})` : ''}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </label>
+
+                                  <FormField label="Status" name="status" defaultValue={patient.status} required />
+                                  <FormField
+                                    label="Email"
+                                    name="email"
+                                    defaultValue={patient.email}
+                                    type="email"
                                   />
-                                </label>
+                                  <FormField label="Phone" name="phone" defaultValue={patient.phone} />
+                                  <FormField label="Team" name="team" defaultValue={patient.team} />
+                                  <FormField label="Gender" name="gender" defaultValue={patient.gender} />
+                                  <FormField
+                                    label="Emergency contact"
+                                    name="emergencyContact"
+                                    defaultValue={patient.emergencyContact}
+                                  />
+                                  <FormField
+                                    label="Emergency phone"
+                                    name="emergencyPhone"
+                                    defaultValue={patient.emergencyPhone}
+                                  />
+                                  <FormField
+                                    label="Last visit"
+                                    name="lastVisit"
+                                    defaultValue={patient.lastVisitValue}
+                                    type="date"
+                                  />
 
-                                <button
-                                  className="inline-flex items-center justify-center rounded-lg bg-sky-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
-                                  type="submit"
-                                >
-                                  Save changes
-                                </button>
+                                  <label className="flex flex-col gap-2 text-sm text-slate-600 md:col-span-2">
+                                    <span className="font-medium text-slate-700">Notes</span>
+                                    <textarea
+                                      className={crudTextAreaClassName()}
+                                      defaultValue={patient.notes ?? ''}
+                                      name="notes"
+                                    />
+                                  </label>
+                                </CrudFormGrid>
+
+                                <CrudFormActions>
+                                  <button
+                                    className="inline-flex items-center justify-center rounded-lg bg-sky-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
+                                    type="submit"
+                                  >
+                                    Save changes
+                                  </button>
+                                </CrudFormActions>
                               </form>
-                            </details>
+                            </CrudFormModal>
 
                             <form action={deletePatientAction}>
                               <input name="id" type="hidden" value={patient.id} />
