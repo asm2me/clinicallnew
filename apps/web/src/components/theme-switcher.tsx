@@ -59,9 +59,9 @@ export default function ThemeSwitcher() {
                 ? 'bg-primary text-primary-foreground shadow-lg scale-105'
                 : 'bg-muted text-muted-foreground hover:bg-muted/80'
             }`}
-            title="Default Green Theme"
+            title="Aurora Theme"
           >
-            🌿 Default
+            ✨ Aurora
           </button>
           <button
             onClick={() => handleThemeChange('ocean')}
@@ -70,9 +70,9 @@ export default function ThemeSwitcher() {
                 ? 'bg-primary text-primary-foreground shadow-lg scale-105'
                 : 'bg-muted text-muted-foreground hover:bg-muted/80'
             }`}
-            title="Ocean Blue Theme"
+            title="Ember Theme"
           >
-            🌊 Ocean
+            🔥 Ember
           </button>
         </div>
       </div>

@@ -19,8 +19,8 @@ export default function ThemeDemoPage() {
             Theme Showcase
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Explore the beautiful themes available. Switch between the Default Green theme 
-            and the new Ocean Blue theme to see the difference!
+            Explore the refreshed themes available. Switch between the luminous Aurora palette
+            and the warm Ember palette to see the full visual transformation.
           </p>
         </section>
 
