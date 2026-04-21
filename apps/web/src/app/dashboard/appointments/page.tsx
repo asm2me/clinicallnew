@@ -11,7 +11,7 @@ import {
   crudTextAreaClassName,
 } from '@/components/dashboard/crud-form-template';
 import { DashboardShell } from '@/components/dashboard/shell';
-import { authOptions } from '@/lib/auth';
+import { authOptions, type AppRole } from '@/lib/auth';
 import { getAppointmentsData } from '@/lib/queries/appointments';
 
 import {
@@ -197,7 +197,7 @@ export default async function AppointmentsPage({
     <DashboardShell
       title="Appointments"
       description="Manage the schedule, assign patients and doctors, and keep clinic calendars up to date."
-      role={session.user.role as string}
+      role={session.user.role as AppRole}
     >
       <div className="space-y-6">
         {message ? (
