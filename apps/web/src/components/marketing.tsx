@@ -1,315 +1,347 @@
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 
-type IconProps = {
-  className?: string;
-};
-
-type Feature = {
+type NarrativeItem = {
   title: string;
-  description: string;
-  icon: (props: IconProps) => JSX.Element;
-};
-
-type Testimonial = {
-  quote: string;
-  name: string;
-  role: string;
-  clinic: string;
+  body: string;
+  meta: string;
 };
 
 type PricingPlan = {
   name: string;
-  description: string;
-  monthly: string;
-  yearly: string;
+  price: string;
+  cadence: string;
+  summary: string;
+  audience: string;
   cta: string;
-  highlight?: boolean;
-  features: string[];
+  href: string;
+  featured?: boolean;
+  notes: string[];
 };
 
-function SparkIcon({ className = 'h-6 w-6' }: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className} aria-hidden="true">
-      <path d="M12 2l1.8 5.2L19 9l-5.2 1.8L12 16l-1.8-5.2L5 9l5.2-1.8L12 2Z" />
-      <path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15Z" />
-      <path d="M5 14l1.1 2.9L9 18l-2.9 1.1L5 22l-1.1-2.9L1 18l2.9-1.1L5 14Z" />
-    </svg>
-  );
-}
-
-function ClinicIcon({ className = 'h-6 w-6' }: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className} aria-hidden="true">
-      <path d="M4 21V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14" />
-      <path d="M9 21v-4h6v4" />
-      <path d="M9 9h.01M15 9h.01M9 13h.01M15 13h.01" />
-      <path d="M12 2v4M10 4h4" />
-    </svg>
-  );
-}
-
-function CalendarIcon({ className = 'h-6 w-6' }: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className} aria-hidden="true">
-      <path d="M7 2v4M17 2v4M3 9h18" />
-      <rect x="3" y="4" width="18" height="17" rx="2" />
-      <path d="m9 14 2 2 4-4" />
-    </svg>
-  );
-}
-
-function BookingIcon({ className = 'h-6 w-6' }: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className} aria-hidden="true">
-      <path d="M4 6h16v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6Z" />
-      <path d="M8 4v4M16 4v4M8 12h8M8 16h5" />
-    </svg>
-  );
-}
-
-function PatientIcon({ className = 'h-6 w-6' }: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className} aria-hidden="true">
-      <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z" />
-      <path d="M4 20a8 8 0 0 1 16 0" />
-      <path d="M19 8h4M21 6v4" />
-    </svg>
-  );
-}
-
-function AnalyticsIcon({ className = 'h-6 w-6' }: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className} aria-hidden="true">
-      <path d="M4 20V10M10 20V4M16 20v-7M22 20v-11" />
-      <path d="M2 20h20" />
-    </svg>
-  );
-}
-
-function ShieldIcon({ className = 'h-6 w-6' }: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className} aria-hidden="true">
-      <path d="M12 3 5 6v6c0 5 3.4 7.7 7 9 3.6-1.3 7-4 7-9V6l-7-3Z" />
-      <path d="m9.5 12 1.7 1.7 3.3-3.7" />
-    </svg>
-  );
-}
-
-const features: Feature[] = [
-  {
-    title: 'Multi-clinic operations',
-    description:
-      'Coordinate several locations from one console with unified branding, tenant-level controls, and centralized reporting.',
-    icon: ClinicIcon
-  },
-  {
-    title: 'Doctor scheduling',
-    description:
-      'Build conflict-free calendars for doctors, specialists, and rooms with smart availability rules and real-time status.',
-    icon: CalendarIcon
-  },
-  {
-    title: 'Online booking',
-    description:
-      'Let patients reserve visits in seconds from your website, campaign pages, or shared links with live availability.',
-    icon: BookingIcon
-  },
-  {
-    title: 'Patient management',
-    description:
-      'Keep every patient profile, visit history, and follow-up task organized so your team can deliver faster care.',
-    icon: PatientIcon
-  },
-  {
-    title: 'Analytics that drive growth',
-    description:
-      'Track bookings, utilization, cancellations, and conversion performance so you know exactly what to improve.',
-    icon: AnalyticsIcon
-  },
-  {
-    title: 'Secure tenant-ready platform',
-    description:
-      'Deliver a premium SaaS experience with role-based access, tenant isolation, and launch-ready operational workflows.',
-    icon: ShieldIcon
-  }
+const proofPoints = [
+  'Faster intake and follow-up coordination',
+  'Shared visibility across front desk and care teams',
+  'Cleaner handoff between scheduling, notes, and billing prep',
+  'A calmer patient experience from first contact to revisit',
 ];
 
-const testimonials: Testimonial[] = [
+const modules: Array<{ label: string; title: string; body: string; icon: ReactNode }> = [
+  {
+    label: 'Flow control',
+    title: 'See the clinic day as it unfolds, not after it slips.',
+    body: 'Live schedules, patient movement, and team actions stay visible in one operational picture so managers can respond before bottlenecks compound.',
+    icon: <PulseIcon />,
+  },
+  {
+    label: 'Patient communication',
+    title: 'Give every patient a more coherent journey.',
+    body: 'Centralized outreach keeps confirmations, reminders, and care updates aligned with the actual state of the visit.',
+    icon: <ChatIcon />,
+  },
+  {
+    label: 'Documentation',
+    title: 'Replace scattered admin with a structured clinical record.',
+    body: 'Capture notes, context, and follow-up actions in the same workspace your team already uses to coordinate care.',
+    icon: <DocumentIcon />,
+  },
+  {
+    label: 'Leadership insight',
+    title: 'Turn daily operations into something measurable.',
+    body: 'Track throughput, missed steps, and operational friction without forcing your team into yet another disconnected reporting tool.',
+    icon: <CompassIcon />,
+  },
+];
+
+const operatingSystemStories: NarrativeItem[] = [
+  {
+    meta: '01 / Before clinic opens',
+    title: 'Prepare the day with one shared briefing surface.',
+    body: 'Teams can review appointments, special handling needs, staffing notes, and at-risk visits before the first patient arrives.',
+  },
+  {
+    meta: '02 / During live operations',
+    title: 'Coordinate movement, exceptions, and communication in real time.',
+    body: 'When visits run long or the schedule shifts, staff can respond from the same source of truth instead of chasing updates across tools.',
+  },
+  {
+    meta: '03 / After patient care',
+    title: 'Close loops while the context is still fresh.',
+    body: 'Documentation, follow-up tasks, and next-step communication stay connected to the visit, reducing operational drift at the end of the day.',
+  },
+];
+
+const testimonials = [
   {
     quote:
-      'Clinicall gave us a premium booking experience that immediately made our brand look more credible and modern.',
-    name: 'Dr. Nadia Karim',
-    role: 'Founder & Medical Director',
-    clinic: 'Northstar Clinics'
+      'We stopped operating like three different teams sharing a building. Front desk, clinicians, and leadership finally see the same day.',
+    name: 'Dr. Maya Chen',
+    role: 'Medical Director, Harbor Family Clinic',
   },
   {
     quote:
-      'Managing branches, doctors, and appointments is finally simple. We spend less time coordinating and more time serving patients.',
-    name: 'Omar Hassan',
-    role: 'Operations Manager',
-    clinic: 'Verve Health Group'
+      'The product feels less like software and more like an operations room. We can spot issues earlier and move patients through the system with less friction.',
+    name: 'Elena Brooks',
+    role: 'Practice Manager, Northline Women’s Health',
   },
-  {
-    quote:
-      'The patient journey feels polished from the first click to the final confirmation. Our no-shows dropped noticeably.',
-    name: 'Sara Ahmed',
-    role: 'Practice Administrator',
-    clinic: 'Apex Family Care'
-  }
 ];
 
 const plans: PricingPlan[] = [
   {
-    name: 'Free',
-    description: 'A polished starting point for solo clinics testing online booking and digital intake.',
-    monthly: '$0',
-    yearly: '$0',
-    cta: 'Start Free Trial',
-    features: ['1 clinic', 'Basic booking', 'Patient profiles', 'Email support']
+    name: 'Starter',
+    price: '$79',
+    cadence: '/clinic month',
+    summary: 'For smaller practices replacing spreadsheets, shared inboxes, and basic scheduling tools.',
+    audience: 'Best for single-location teams establishing a cleaner daily operating rhythm.',
+    cta: 'Start with Starter',
+    href: '/register',
+    notes: ['Scheduling and calendar coordination', 'Patient messaging hub', 'Shared activity tracking'],
   },
   {
-    name: 'Basic',
-    description: 'Built for growing clinics that need scheduling automation, analytics, and a stronger patient journey.',
-    monthly: '$49',
-    yearly: '$39',
-    cta: 'Book Demo',
-    features: ['Up to 3 clinics', 'Doctor scheduling', 'Online booking', 'Core analytics']
+    name: 'Growth',
+    price: '$179',
+    cadence: '/clinic month',
+    summary: 'For active clinics ready to manage intake, care coordination, and team visibility in one place.',
+    audience: 'Best for multi-role teams that need tighter operational control and clearer accountability.',
+    cta: 'Choose Growth',
+    href: '/register',
+    featured: true,
+    notes: ['Everything in Starter', 'Workflow automation and team views', 'Advanced reporting and clinic oversight'],
   },
   {
-    name: 'Pro',
-    description: 'Advanced operations for multi-location healthcare businesses focused on growth and premium service.',
-    monthly: '$99',
-    yearly: '$79',
-    cta: 'Start Free Trial',
-    highlight: true,
-    features: ['Unlimited clinics', 'Advanced permissions', 'Automation workflows', 'Priority support']
-  }
+    name: 'Enterprise',
+    price: 'Custom',
+    cadence: '',
+    summary: 'For larger groups that need tailored rollout support, oversight, and implementation planning.',
+    audience: 'Best for regional operators and complex organizations with multiple clinics or service lines.',
+    cta: 'Talk to sales',
+    href: '/contact',
+    notes: ['Implementation guidance', 'Custom configuration support', 'Priority partnership and rollout planning'],
+  },
 ];
 
-const comparisons = [
-  { feature: 'Multi-clinic management', free: '—', basic: '✓', pro: '✓' },
-  { feature: 'Doctor scheduling', free: '—', basic: '✓', pro: '✓' },
-  { feature: 'Online booking', free: '✓', basic: '✓', pro: '✓' },
-  { feature: 'Patient management', free: '✓', basic: '✓', pro: '✓' },
-  { feature: 'Analytics dashboard', free: 'Basic', basic: 'Advanced', pro: 'Advanced+' },
-  { feature: 'Priority support', free: '—', basic: '—', pro: '✓' }
-];
+function SectionLabel({ children }: { children: ReactNode }) {
+  return (
+    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-muted-foreground">
+      {children}
+    </p>
+  );
+}
+
+function ArrowUpRightIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M7 17 17 7" />
+      <path d="M9 7h8v8" />
+    </svg>
+  );
+}
+
+function PulseIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 12h4l2.5-5 4 10 2.5-5H21" />
+    </svg>
+  );
+}
+
+function ChatIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M7 10h10" />
+      <path d="M7 14h6" />
+      <path d="M5 19V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9l-4 3Z" />
+    </svg>
+  );
+}
+
+function DocumentIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M8 7h8" />
+      <path d="M8 11h8" />
+      <path d="M8 15h5" />
+      <path d="M7 3h8l4 4v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" />
+      <path d="M15 3v4h4" />
+    </svg>
+  );
+}
+
+function CompassIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="8" />
+      <path d="m15.5 8.5-2.6 5.1-5.1 2.6 2.6-5.1 5.1-2.6Z" />
+    </svg>
+  );
+}
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden border-b border-border bg-gradient-to-br from-primary-900 via-primary-800 to-primary-700 text-white">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(52,211,153,0.15),_transparent_40%),radial-gradient(circle_at_bottom_right,_rgba(129,140,248,0.12),_transparent_40%)]" />
-      <div className="relative mx-auto grid max-w-7xl gap-14 px-4 py-20 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:px-8 lg:py-28">
-        <div className="max-w-2xl">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary-400/20 bg-primary-400/10 px-4 py-2 text-sm text-primary-100 backdrop-blur">
-            <SparkIcon className="h-4 w-4" />
-            Premium clinic management platform
+    <section className="px-4 pb-10 pt-8 sm:px-6 lg:px-8 lg:pb-14 lg:pt-10">
+      <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)] lg:items-end">
+        <div className="space-y-8 rounded-[2rem] border border-border bg-card/60 p-6 shadow-[0_24px_80px_-56px_rgba(0,0,0,0.7)] sm:p-8 lg:p-10">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="rounded-full border border-border bg-background/80 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+              Editorial clinic operations
+            </span>
+            <span className="rounded-full bg-primary/10 px-4 py-2 text-xs font-medium text-primary">
+              Built for practices that value precision and calm
+            </span>
           </div>
-          <h1 className="mt-6 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-            Transform Your Clinic Operations With Intelligent Booking
-          </h1>
-          <p className="mt-6 text-lg leading-8 text-primary-100/90">
-            Streamline appointments, reduce no-shows, and deliver exceptional patient experiences with our modern, intuitive platform designed for healthcare excellence.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-4">
+
+          <div className="max-w-3xl space-y-5">
+            <h1 className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+              A better clinic day starts with a better operating system.
+            </h1>
+            <p className="max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
+              Clinicall replaces fragmented admin with a clearer way to run care. Scheduling,
+              patient communication, documentation, and team visibility all live in one editorial,
+              day-shaping workspace.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-4 sm:flex-row">
             <Link
               href="/register"
-              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary-400 to-primary-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary-500/30 transition hover:from-primary-300 hover:to-primary-400"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition hover:opacity-95"
             >
-              <SparkIcon className="h-4 w-4" />
-              Start Free Trial
+              Start free
+              <ArrowUpRightIcon />
             </Link>
             <Link
-              href="/contact"
-              className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/20 backdrop-blur-sm"
+              href="/features"
+              className="inline-flex items-center justify-center rounded-full border border-border px-6 py-3.5 text-sm font-medium text-foreground transition hover:bg-accent"
             >
-              <CalendarIcon className="h-4 w-4" />
-              Book Demo
+              Explore the system
             </Link>
           </div>
-          <div className="mt-10 grid gap-4 sm:grid-cols-3">
-            {[
-              { value: '99.9%', label: 'Platform uptime', icon: ShieldIcon },
-              { value: '3x', label: 'Faster bookings', icon: BookingIcon },
-              { value: '24/7', label: 'Patient access', icon: SparkIcon }
-            ].map((item) => (
-              <div key={item.label} className="rounded-2xl border border-primary-400/10 bg-primary-400/5 p-5 backdrop-blur-sm">
-                <item.icon className="h-5 w-5 text-primary-300" />
-                <p className="mt-4 text-2xl font-semibold text-white">{item.value}</p>
-                <p className="mt-1 text-sm text-primary-100/70">{item.label}</p>
-              </div>
-            ))}
+
+          <div className="grid gap-4 border-t border-border pt-6 sm:grid-cols-3">
+            <div>
+              <p className="text-3xl font-semibold text-foreground">1 source</p>
+              <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                of truth for front desk, clinicians, and operators.
+              </p>
+            </div>
+            <div>
+              <p className="text-3xl font-semibold text-foreground">Live-day</p>
+              <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                awareness for visits, delays, exceptions, and follow-up needs.
+              </p>
+            </div>
+            <div>
+              <p className="text-3xl font-semibold text-foreground">Care-first</p>
+              <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                workflows that reduce noise without flattening clinical nuance.
+              </p>
+            </div>
           </div>
         </div>
-        <div className="relative">
-          <div className="absolute -inset-6 rounded-[2rem] bg-primary-400/10 blur-3xl" />
-          <div className="relative rounded-[2rem] border border-primary-400/20 bg-primary-900/30 p-4 shadow-2xl shadow-primary-950/40 backdrop-blur-xl">
-            <div className="rounded-[1.5rem] border border-primary-400/20 bg-primary-950/60 p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-primary-200">Live clinic command center</p>
-                  <p className="text-xl font-semibold text-white">Operations dashboard</p>
-                </div>
-                <span className="rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-300">
-                  Live
-                </span>
+
+        <div className="overflow-hidden rounded-[2rem] border border-border bg-background shadow-[0_32px_100px_-60px_rgba(0,0,0,0.75)]">
+          <div className="border-b border-border px-6 py-5">
+            <SectionLabel>Clinic daybook</SectionLabel>
+            <div className="mt-3 flex items-end justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-semibold tracking-tight text-foreground">Today’s command view</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  A narrative picture of capacity, patient flow, and the work still open.
+                </p>
               </div>
+              <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+                Live operations
+              </span>
+            </div>
+          </div>
 
-              <div className="mt-6 grid gap-4 md:grid-cols-[1.1fr_0.9fr]">
-                <div className="rounded-2xl border border-primary-400/10 bg-primary-900/30 p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-primary-200">Appointments today</p>
-                      <p className="mt-1 text-3xl font-bold text-white">128</p>
-                    </div>
-                    <AnalyticsIcon className="h-8 w-8 text-primary-400" />
-                  </div>
-                  <div className="mt-4 h-28 rounded-xl bg-gradient-to-b from-primary-500/20 to-primary-900/20 p-4">
-                    <div className="flex h-full items-end gap-2">
-                      {[35, 60, 44, 72, 58, 84, 66].map((height, index) => (
-                        <div
-                          key={index}
-                          className="flex-1 rounded-t-lg bg-gradient-to-t from-primary-600 to-primary-400"
-                          style={{ height: `${height}%` }}
-                        />
-                      ))}
-                    </div>
-                  </div>
+          <div className="grid gap-6 p-6">
+            <div className="grid gap-4 sm:grid-cols-[1.1fr_0.9fr]">
+              <div className="rounded-[1.5rem] border border-border bg-card p-5">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-foreground">Schedule integrity</p>
+                  <span className="text-xs text-muted-foreground">08:00 — 17:30</span>
                 </div>
-
-                <div className="space-y-4">
+                <div className="mt-5 space-y-4">
                   {[
-                    ['Confirmed bookings', '91', 'text-emerald-400'],
-                    ['Pending approvals', '14', 'text-amber-400'],
-                    ['No-show alerts', '07', 'text-rose-400']
-                  ].map(([label, value, color]) => (
-                    <div key={label} className="rounded-2xl border border-primary-400/10 bg-primary-900/30 p-4">
-                      <p className="text-sm text-primary-200">{label}</p>
-                      <p className={`mt-2 text-2xl font-semibold ${color}`}>{value}</p>
+                    ['On-time visits', '84%'],
+                    ['Pending confirmations', '12'],
+                    ['Follow-up tasks', '07'],
+                  ].map(([label, value]) => (
+                    <div key={label} className="flex items-center justify-between border-b border-border/70 pb-3 last:border-b-0 last:pb-0">
+                      <span className="text-sm text-muted-foreground">{label}</span>
+                      <span className="text-lg font-semibold text-foreground">{value}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="mt-6 space-y-3">
-                {[
-                  ['09:00', 'New patient consultation', 'Dr. Lina Hassan', 'Confirmed'],
-                  ['10:30', 'Dermatology follow-up', 'Dr. Omar Nabil', 'Booked'],
-                  ['13:00', 'Telehealth review', 'Dr. Sara Adel', 'Pending']
-                ].map(([time, title, doctor, status]) => (
-                  <div key={time} className="flex items-center justify-between rounded-xl border border-primary-400/10 bg-primary-900/30 px-4 py-3">
-                    <div className="flex items-start gap-3">
-                      <div className="mt-1 rounded-lg bg-primary-500/20 p-2 text-primary-300">
-                        <CalendarIcon className="h-4 w-4" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-white">{title}</p>
-                        <p className="text-sm text-primary-200">
-                          {time} · {doctor}
-                        </p>
-                      </div>
-                    </div>
-                    <span className="rounded-full border border-primary-400/20 px-3 py-1 text-xs text-primary-100">{status}</span>
+              <div className="rounded-[1.5rem] border border-border bg-primary p-5 text-primary-foreground">
+                <p className="text-sm font-medium text-primary-foreground/80">Operational note</p>
+                <p className="mt-3 text-lg font-semibold leading-7">
+                  Two providers are running ahead. Front desk can pull forward three waiting patients
+                  and reduce late-afternoon congestion.
+                </p>
+              </div>
+            </div>
+
+            <div className="rounded-[1.5rem] border border-border bg-card p-5">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-sm font-medium text-foreground">What teams keep in view</p>
+                <span className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
+                  Coordinated workflows
+                </span>
+              </div>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                {proofPoints.map((item) => (
+                  <div key={item} className="flex gap-3 rounded-2xl border border-border/80 bg-background/80 px-4 py-3">
+                    <span className="mt-1 h-2 w-2 rounded-full bg-primary" />
+                    <p className="text-sm leading-6 text-muted-foreground">{item}</p>
                   </div>
                 ))}
               </div>
@@ -323,19 +355,33 @@ export function HeroSection() {
 
 export function TrustBand() {
   return (
-    <section className="border-b border-border bg-gradient-to-r from-primary-50 to-secondary-50 py-8 dark:from-primary-950/30 dark:to-secondary-950/30">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-6 px-4 sm:px-6 lg:px-8">
-        {[
-          { label: 'Trusted by modern clinics', icon: ShieldIcon },
-          { label: 'Multi-location ready', icon: ClinicIcon },
-          { label: 'Accessible patient journeys', icon: PatientIcon },
-          { label: 'Built for conversion', icon: SparkIcon }
-        ].map((item) => (
-          <div key={item.label} className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
-            <item.icon className="h-4 w-4 text-primary-600" />
-            <span>{item.label}</span>
+    <section className="px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+      <div className="mx-auto max-w-7xl rounded-[2rem] border border-border bg-background/70 px-6 py-8 sm:px-8 lg:px-10">
+        <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+          <div className="space-y-3">
+            <SectionLabel>Why clinics switch</SectionLabel>
+            <h2 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+              High-trust operations need more than a collection of disconnected tools.
+            </h2>
+            <p className="text-sm leading-6 text-muted-foreground sm:text-base">
+              Clinicall is designed for care environments where handoffs matter, timing matters, and
+              every operational detail shapes the patient experience.
+            </p>
           </div>
-        ))}
+
+          <div className="grid gap-4 sm:grid-cols-3">
+            {[
+              ['Scheduling', 'Bring booking, rescheduling, and daily flow into one coordinated layer.'],
+              ['Patient experience', 'Keep reminders, arrivals, and follow-up communication connected to the real visit.'],
+              ['Leadership visibility', 'Understand pressure points across teams without losing clinical context.'],
+            ].map(([title, body]) => (
+              <div key={title} className="rounded-[1.5rem] border border-border bg-card px-5 py-5">
+                <p className="text-sm font-semibold text-foreground">{title}</p>
+                <p className="mt-3 text-sm leading-6 text-muted-foreground">{body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -343,35 +389,45 @@ export function TrustBand() {
 
 export function FeatureGrid() {
   return (
-    <section id="features" className="py-20 sm:py-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary-600">Platform features</p>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-4xl">
-            A Modern Clinic Platform Built for Healthcare Excellence
-          </h2>
-          <p className="mt-4 text-lg leading-8 text-slate-600 dark:text-slate-300">
-            Everything from appointment intake to analytics is designed to feel premium, move fast, and support healthcare teams at scale.
-          </p>
-        </div>
+    <section className="px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
+      <div className="mx-auto max-w-7xl">
+        <div className="grid gap-8 lg:grid-cols-[0.7fr_1.3fr] lg:items-start">
+          <div className="space-y-4 lg:sticky lg:top-28">
+            <SectionLabel>The system</SectionLabel>
+            <h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+              Four connected layers for the modern clinic.
+            </h2>
+            <p className="text-sm leading-6 text-muted-foreground sm:text-base">
+              Instead of forcing teams to jump between isolated apps, Clinicall is designed as one
+              continuous operating environment.
+            </p>
+          </div>
 
-        <div className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {features.map((feature) => (
-            <article
-              key={feature.title}
-              className="group card-base card-hover p-6"
-            >
-              <div className="inline-flex rounded-2xl bg-primary-500/10 p-3 text-primary-600 transition group-hover:bg-primary-500 group-hover:text-white">
-                <feature.icon className="h-6 w-6" />
-              </div>
-              <h3 className="mt-5 text-xl font-semibold text-slate-950 dark:text-white">{feature.title}</h3>
-              <p className="mt-3 leading-7 text-slate-600 dark:text-slate-300">{feature.description}</p>
-              <div className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-primary-600">
-                Learn more
-                <span aria-hidden="true">→</span>
-              </div>
-            </article>
-          ))}
+          <div className="grid gap-4 sm:grid-cols-2">
+            {modules.map((module, index) => (
+              <article
+                key={module.title}
+                className={index === 1 ? 'sm:translate-y-10' : index === 2 ? 'sm:-translate-y-4' : ''}
+              >
+                <div className="h-full rounded-[1.75rem] border border-border bg-card p-6 shadow-[0_24px_80px_-60px_rgba(0,0,0,0.65)]">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                      {module.icon}
+                    </span>
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+                        {module.label}
+                      </p>
+                    </div>
+                  </div>
+                  <h3 className="mt-6 text-xl font-semibold tracking-tight text-foreground">
+                    {module.title}
+                  </h3>
+                  <p className="mt-4 text-sm leading-7 text-muted-foreground">{module.body}</p>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -380,53 +436,36 @@ export function FeatureGrid() {
 
 export function HowItWorks() {
   return (
-    <section className="bg-gradient-to-b from-primary-50 to-white dark:from-primary-950/20 dark:to-slate-950 py-20 sm:py-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary-600">How it works</p>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-4xl">
-            Go from First Visitor to Confirmed Patient in Four Simple Steps
-          </h2>
-        </div>
+    <section className="px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
+      <div className="mx-auto max-w-7xl rounded-[2rem] border border-border bg-card/60 p-6 sm:p-8 lg:p-10">
+        <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="space-y-4">
+            <SectionLabel>How it works</SectionLabel>
+            <h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+              Built around the actual rhythm of a care day.
+            </h2>
+            <p className="text-sm leading-7 text-muted-foreground sm:text-base">
+              Clinicall follows the clinic journey from preparation to live operations to follow-up,
+              so information stays coherent as patients and teams move.
+            </p>
+          </div>
 
-        <div className="mt-12 grid gap-6 lg:grid-cols-4">
-          {[
-            {
-              step: '01',
-              title: 'Create your tenant workspace',
-              description: 'Launch a branded clinic environment with plans, permissions, and a conversion-ready digital presence.',
-              icon: ClinicIcon
-            },
-            {
-              step: '02',
-              title: 'Configure doctors and schedules',
-              description: 'Assign providers, specialties, rooms, and availability rules across branches without manual chaos.',
-              icon: CalendarIcon
-            },
-            {
-              step: '03',
-              title: 'Accept bookings online',
-              description: 'Let patients book on any device with clean flows, instant confirmations, and reduced friction.',
-              icon: BookingIcon
-            },
-            {
-              step: '04',
-              title: 'Measure and optimize growth',
-              description: 'Use analytics, alerts, and patient behavior insights to improve conversion and operational efficiency.',
-              icon: AnalyticsIcon
-            }
-          ].map((item) => (
-            <article key={item.step} className="rounded-2xl border border-border bg-white p-6 shadow-sm dark:bg-slate-950">
-              <div className="flex items-center justify-between">
-                <div className="inline-flex rounded-2xl bg-primary-500/10 p-3 text-primary-600">
-                  <item.icon className="h-6 w-6" />
-                </div>
-                <p className="text-sm font-semibold text-primary-600">{item.step}</p>
-              </div>
-              <h3 className="mt-5 text-xl font-semibold text-slate-950 dark:text-white">{item.title}</h3>
-              <p className="mt-3 leading-7 text-slate-600 dark:text-slate-300">{item.description}</p>
-            </article>
-          ))}
+          <div className="space-y-4">
+            {operatingSystemStories.map((story) => (
+              <article
+                key={story.meta}
+                className="rounded-[1.5rem] border border-border bg-background/80 p-5 sm:p-6"
+              >
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+                  {story.meta}
+                </p>
+                <h3 className="mt-3 text-xl font-semibold tracking-tight text-foreground">
+                  {story.title}
+                </h3>
+                <p className="mt-3 text-sm leading-7 text-muted-foreground">{story.body}</p>
+              </article>
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -435,33 +474,37 @@ export function HowItWorks() {
 
 export function TestimonialsSection() {
   return (
-    <section className="py-20 sm:py-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary-600">Customer stories</p>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-4xl">
-            Trusted by Healthcare Teams Delivering Exceptional Care
+    <section className="px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
+      <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[0.8fr_1.2fr]">
+        <div className="space-y-4">
+          <SectionLabel>Field notes</SectionLabel>
+          <h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+            What practice leaders notice first.
           </h2>
+          <p className="text-sm leading-7 text-muted-foreground sm:text-base">
+            Less rework, clearer handoffs, and a calmer front-of-house experience are often the first
+            changes teams describe after adopting Clinicall.
+          </p>
         </div>
-        <div className="mt-12 grid gap-6 lg:grid-cols-3">
-          {testimonials.map((testimonial) => (
-            <figure
-              key={testimonial.name}
-              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_24px_60px_-30px_rgba(15,23,42,0.24)] dark:border-slate-800 dark:bg-slate-950"
+
+        <div className="grid gap-4">
+          {testimonials.map((item, index) => (
+            <blockquote
+              key={item.name}
+              className={index === 0 ? 'rounded-[1.75rem] border border-border bg-primary p-6 text-primary-foreground sm:p-8' : 'rounded-[1.75rem] border border-border bg-card p-6 sm:p-8'}
             >
-              <div className="inline-flex rounded-full bg-primary-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-primary-600">
-                Verified customer
-              </div>
-              <blockquote className="mt-5 text-lg leading-8 text-slate-800 dark:text-slate-100">"{testimonial.quote}"</blockquote>
-              <figcaption className="mt-6 border-t border-border pt-5">
-                <div className="font-semibold text-slate-950 dark:text-white">{testimonial.name}</div>
-                <div className="text-sm text-slate-500 dark:text-slate-400">{testimonial.role}</div>
-                <div className="mt-1 inline-flex items-center gap-2 text-sm text-primary-600">
-                  <ClinicIcon className="h-4 w-4" />
-                  {testimonial.clinic}
-                </div>
-              </figcaption>
-            </figure>
+              <p className={index === 0 ? 'text-xl font-medium leading-8 text-primary-foreground' : 'text-xl font-medium leading-8 text-foreground'}>
+                “{item.quote}”
+              </p>
+              <footer className="mt-6">
+                <p className={index === 0 ? 'text-sm font-semibold text-primary-foreground' : 'text-sm font-semibold text-foreground'}>
+                  {item.name}
+                </p>
+                <p className={index === 0 ? 'text-sm text-primary-foreground/80' : 'text-sm text-muted-foreground'}>
+                  {item.role}
+                </p>
+              </footer>
+            </blockquote>
           ))}
         </div>
       </div>
@@ -471,81 +514,36 @@ export function TestimonialsSection() {
 
 export function PricingSection() {
   return (
-    <section className="bg-gradient-to-b from-primary-50 to-white dark:from-primary-950/20 dark:to-slate-950 py-20 sm:py-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary-600">Pricing</p>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-4xl">
-            Flexible Plans Designed for Growth at Every Stage
-          </h2>
-          <p className="mt-4 text-lg leading-8 text-slate-600 dark:text-slate-300">
-            Start free, scale with confidence, and unlock advanced automation, analytics, and tenant-level controls as you grow.
-          </p>
-        </div>
-
-        <div className="mt-10 inline-flex rounded-full border border-border bg-white p-1 shadow-sm dark:bg-slate-950">
-          <span className="rounded-full bg-primary-500 px-4 py-2 text-sm font-semibold text-white">Monthly billing</span>
-          <span className="px-4 py-2 text-sm font-medium text-slate-500 dark:text-slate-400">Yearly billing</span>
-        </div>
-
-        <div className="mt-12 grid gap-6 lg:grid-cols-3">
-          {plans.map((plan) => (
-            <article
-              key={plan.name}
-              className={`rounded-2xl border p-7 shadow-[0_24px_60px_-30px_rgba(15,23,42,0.24)] ${
-                plan.highlight
-                  ? 'border-primary-500 bg-primary-950 text-white'
-                  : 'border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950'
-              }`}
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className={`text-sm font-semibold uppercase tracking-[0.3em] ${plan.highlight ? 'text-primary-300' : 'text-primary-600'}`}>
-                    {plan.name}
-                  </p>
-                  <p className={`mt-4 text-5xl font-bold ${plan.highlight ? 'text-white' : 'text-slate-950 dark:text-white'}`}>
-                    {plan.monthly}
-                  </p>
-                  <p className={`mt-1 text-sm ${plan.highlight ? 'text-slate-300' : 'text-slate-500 dark:text-slate-400'}`}>
-                    or {plan.yearly}/mo yearly
-                  </p>
-                </div>
-                <div
-                  className={`inline-flex rounded-2xl p-3 ${
-                    plan.highlight ? 'bg-white/10 text-primary-300' : 'bg-primary-500/10 text-primary-600'
-                  }`}
-                >
-                  <SparkIcon className="h-6 w-6" />
-                </div>
-              </div>
-
-              <p className={`mt-5 leading-7 ${plan.highlight ? 'text-slate-300' : 'text-slate-600 dark:text-slate-300'}`}>
-                {plan.description}
-              </p>
-
-              <ul className="mt-6 space-y-3 text-sm">
-                {plan.features.map((feature) => (
-                  <li key={feature} className={`flex items-center gap-3 ${plan.highlight ? 'text-slate-100' : 'text-slate-700 dark:text-slate-300'}`}>
-                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary-500/15 text-primary-500">
-                      ✓
-                    </span>
-                    {feature}
+    <section className="px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
+      <div className="mx-auto max-w-7xl">
+        <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
+          <div className="space-y-4">
+            <SectionLabel>Pricing</SectionLabel>
+            <h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+              Choose the operating model that fits your clinic stage.
+            </h2>
+            <p className="text-sm leading-7 text-muted-foreground sm:text-base">
+              Start with the essentials or roll out a more advanced command layer for larger teams.
+              Every plan is designed to reduce operational fragmentation and support better care flow.
+            </p>
+            <div className="rounded-[1.5rem] border border-border bg-card p-5">
+              <p className="text-sm font-semibold text-foreground">Included with every plan</p>
+              <ul className="mt-4 space-y-3">
+                {[
+                  'Modern scheduling and day planning',
+                  'Shared patient communication history',
+                  'A clinic-wide view of tasks and follow-up',
+                ].map((item) => (
+                  <li key={item} className="flex gap-3 text-sm leading-6 text-muted-foreground">
+                    <span className="mt-2 h-1.5 w-1.5 rounded-full bg-primary" />
+                    {item}
                   </li>
                 ))}
               </ul>
+            </div>
+          </div>
 
-              <Link
-                href={plan.name === 'Free' || plan.name === 'Pro' ? '/register' : '/contact'}
-                className={`mt-8 inline-flex w-full items-center justify-center rounded-full px-5 py-3 text-sm font-semibold transition ${
-                  plan.highlight
-                    ? 'bg-primary-500 text-white hover:bg-primary-400'
-                    : 'border border-border bg-transparent text-slate-950 hover:bg-slate-100 dark:text-white dark:hover:bg-white/10'
-                }`}
-              >
-                {plan.cta}
-              </Link>
-            </article>
-          ))}
+          <PricingTable />
         </div>
       </div>
     </section>
@@ -554,74 +552,115 @@ export function PricingSection() {
 
 export function PricingTable() {
   return (
-    <section className="py-20 sm:py-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_24px_60px_-30px_rgba(15,23,42,0.22)] dark:border-slate-800 dark:bg-slate-950">
-          <div className="flex items-center justify-between border-b border-border px-6 py-5">
+    <div className="grid gap-4 xl:grid-cols-3">
+      {plans.map((plan) => (
+        <article
+          key={plan.name}
+          className={
+            plan.featured
+              ? 'rounded-[1.75rem] border border-primary/30 bg-primary p-6 text-primary-foreground shadow-[0_36px_100px_-70px_rgba(0,0,0,0.8)]'
+              : 'rounded-[1.75rem] border border-border bg-card p-6'
+          }
+        >
+          <div className="flex items-start justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-semibold text-slate-950 dark:text-white">Plan comparison</h2>
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Everything you need to pick the right launch plan.</p>
+              <p
+                className={
+                  plan.featured
+                    ? 'text-[11px] font-semibold uppercase tracking-[0.24em] text-primary-foreground/80'
+                    : 'text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground'
+                }
+              >
+                {plan.name}
+              </p>
+              <p className={plan.featured ? 'mt-4 text-4xl font-semibold text-primary-foreground' : 'mt-4 text-4xl font-semibold text-foreground'}>
+                {plan.price}
+                <span className={plan.featured ? 'ml-1 text-base font-normal text-primary-foreground/80' : 'ml-1 text-base font-normal text-muted-foreground'}>
+                  {plan.cadence}
+                </span>
+              </p>
             </div>
-            <ShieldIcon className="h-6 w-6 text-primary-500" />
+            {plan.featured ? (
+              <span className="rounded-full bg-background/15 px-3 py-1 text-xs font-medium text-primary-foreground">
+                Most chosen
+              </span>
+            ) : null}
           </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-border text-left text-sm">
-              <thead className="bg-primary-50 dark:bg-primary-950/30">
-                <tr>
-                  <th className="px-6 py-4 font-semibold text-slate-950 dark:text-white">Feature</th>
-                  <th className="px-6 py-4 font-semibold text-slate-950 dark:text-white">Free</th>
-                  <th className="px-6 py-4 font-semibold text-slate-950 dark:text-white">Basic</th>
-                  <th className="px-6 py-4 font-semibold text-slate-950 dark:text-white">Pro</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {comparisons.map((row) => (
-                  <tr key={row.feature}>
-                    <td className="px-6 py-4 font-medium text-slate-900 dark:text-slate-100">{row.feature}</td>
-                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">{row.free}</td>
-                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">{row.basic}</td>
-                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">{row.pro}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </section>
+
+          <p className={plan.featured ? 'mt-5 text-sm leading-7 text-primary-foreground/85' : 'mt-5 text-sm leading-7 text-muted-foreground'}>
+            {plan.summary}
+          </p>
+          <p className={plan.featured ? 'mt-3 text-sm leading-7 text-primary-foreground/75' : 'mt-3 text-sm leading-7 text-muted-foreground'}>
+            {plan.audience}
+          </p>
+
+          <ul className="mt-6 space-y-3">
+            {plan.notes.map((item) => (
+              <li
+                key={item}
+                className={
+                  plan.featured
+                    ? 'flex gap-3 text-sm leading-6 text-primary-foreground/90'
+                    : 'flex gap-3 text-sm leading-6 text-muted-foreground'
+                }
+              >
+                <span className={plan.featured ? 'mt-2 h-1.5 w-1.5 rounded-full bg-primary-foreground' : 'mt-2 h-1.5 w-1.5 rounded-full bg-primary'} />
+                {item}
+              </li>
+            ))}
+          </ul>
+
+          <Link
+            href={plan.href}
+            className={
+              plan.featured
+                ? 'mt-8 inline-flex items-center gap-2 rounded-full bg-background px-5 py-3 text-sm font-semibold text-foreground transition hover:opacity-95'
+                : 'mt-8 inline-flex items-center gap-2 rounded-full border border-border px-5 py-3 text-sm font-semibold text-foreground transition hover:bg-accent'
+            }
+          >
+            {plan.cta}
+            <ArrowUpRightIcon />
+          </Link>
+        </article>
+      ))}
+    </div>
   );
 }
 
 export function CTASection() {
   return (
-    <section className="relative overflow-hidden border-t border-border bg-gradient-to-br from-primary-900 via-primary-800 to-primary-700 py-20 text-white sm:py-24">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(52,211,153,0.15),_transparent_40%)]" />
-      <div className="relative mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-        <div className="inline-flex items-center gap-2 rounded-full border border-primary-400/20 bg-primary-400/10 px-4 py-2 text-sm text-primary-100">
-          <SparkIcon className="h-4 w-4" />
-          Launch-ready clinic platform
-        </div>
-        <h2 className="mt-6 text-3xl font-bold tracking-tight sm:text-4xl">
-          Ready to Transform Your Clinic Operations Today?
-        </h2>
-        <p className="mt-4 text-lg leading-8 text-primary-100/90">
-          Start your free trial today or book a demo to see how Clinicall helps health centers scale operations and deliver a premium patient journey.
-        </p>
-        <div className="mt-8 flex flex-wrap justify-center gap-4">
-          <Link
-            href="/register"
-            className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary-400 to-primary-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary-500/30 transition hover:from-primary-300 hover:to-primary-400"
-          >
-            <SparkIcon className="h-4 w-4" />
-            Start Free Trial
-          </Link>
-          <Link
-            href="/contact"
-            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/20 backdrop-blur-sm"
-          >
-            <CalendarIcon className="h-4 w-4" />
-            Book Demo
-          </Link>
+    <section className="px-4 py-10 sm:px-6 lg:px-8 lg:py-20">
+      <div className="mx-auto max-w-7xl overflow-hidden rounded-[2rem] border border-border bg-background shadow-[0_28px_100px_-68px_rgba(0,0,0,0.8)]">
+        <div className="grid gap-8 px-6 py-8 sm:px-8 sm:py-10 lg:grid-cols-[1.1fr_0.9fr] lg:px-10 lg:py-12">
+          <div className="space-y-4">
+            <SectionLabel>Next step</SectionLabel>
+            <h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+              Design a steadier clinic experience from the inside out.
+            </h2>
+            <p className="max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
+              Whether you are modernizing one location or coordinating a broader care network,
+              Clinicall helps teams work from a clearer operational narrative every day.
+            </p>
+          </div>
+
+          <div className="flex flex-col justify-center gap-3 rounded-[1.5rem] border border-border bg-card p-5 sm:p-6">
+            <Link
+              href="/register"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-95"
+            >
+              Start free
+              <ArrowUpRightIcon />
+            </Link>
+            <Link
+              href="/contact"
+              className="inline-flex items-center justify-center rounded-full border border-border px-5 py-3 text-sm font-medium text-foreground transition hover:bg-accent"
+            >
+              Speak with sales
+            </Link>
+            <p className="text-center text-xs uppercase tracking-[0.22em] text-muted-foreground">
+              No extra tools. No scattered workflows. Just one clinical operating system.
+            </p>
+          </div>
         </div>
       </div>
     </section>

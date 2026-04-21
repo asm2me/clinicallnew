@@ -1,78 +1,125 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
-type NavItem = { href: string; label: string; icon: string; roles?: string[] };
+type NavItem = {
+  label: string;
+  href: string;
+  roles?: string[];
+};
 
 const navItems: NavItem[] = [
-  { href: '/dashboard', label: 'Overview', icon: '▤' },
-  { href: '/dashboard/appointments', label: 'Appointments', icon: '📅' },
-  { href: '/dashboard/patients', label: 'Patients', icon: '👤' },
-  { href: '/dashboard/clinics', label: 'Clinics', icon: '🏥' },
-  { href: '/dashboard/users', label: 'Users', icon: '👥', roles: ['SUPER_ADMIN', 'TENANT_ADMIN'] },
-  { href: '/dashboard/analytics', label: 'Analytics', icon: '📊' },
-  { href: '/dashboard/settings#tenant-management', label: 'Tenants', icon: '🏢', roles: ['SUPER_ADMIN'] },
-  { href: '/dashboard/settings', label: 'Settings', icon: '⚙️' },
+  { label: 'Overview', href: '/dashboard' },
+  { label: 'Appointments', href: '/dashboard/appointments' },
+  { label: 'Patients', href: '/dashboard/patients' },
+  { label: 'Clinics', href: '/dashboard/clinics' },
+  { label: 'Users', href: '/dashboard/users', roles: ['SUPER_ADMIN', 'TENANT_ADMIN'] },
+  { label: 'Analytics', href: '/dashboard/analytics' },
+  {
+    label: 'Tenants',
+    href: '/dashboard/settings#tenant-management',
+    roles: ['SUPER_ADMIN'],
+  },
+  { label: 'Settings', href: '/dashboard/settings' },
 ];
 
-type DashboardNavProps = { role: string };
+export interface DashboardNavProps {
+  role: string;
+}
 
 export function DashboardNav({ role }: DashboardNavProps) {
   const pathname = usePathname();
-  const [hash, setHash] = useState('');
-  const visibleItems = navItems.filter((item) => !item.roles || item.roles.includes(role));
+  const [currentHash, setCurrentHash] = useState('');
 
   useEffect(() => {
-    const updateHash = () => setHash(window.location.hash);
+    const syncHash = () => setCurrentHash(window.location.hash);
 
-    updateHash();
-    window.addEventListener('hashchange', updateHash);
+    syncHash();
+    window.addEventListener('hashchange', syncHash);
 
-    return () => window.removeEventListener('hashchange', updateHash);
+    return () => window.removeEventListener('hashchange', syncHash);
   }, []);
 
-  return (
-    <nav aria-label="Dashboard navigation" className="space-y-0.5">
-      {visibleItems.map((item) => {
-        const [matchHref, matchHash = ''] = item.href.split('#');
-        const isActive = matchHash
-          ? pathname === matchHref && hash === `#${matchHash}`
-          : matchHref === '/dashboard'
-            ? pathname === '/dashboard'
-            : pathname.startsWith(matchHref);
+  const visibleItems = navItems.filter((item) => !item.roles || item.roles.includes(role));
 
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            aria-current={isActive ? 'page' : undefined}
-            className={[
-              'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150',
-              isActive
-                ? 'bg-primary/10 text-primary'
-                : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-            ].join(' ')}
-          >
-            <span
+  return (
+    <nav aria-label="Dashboard navigation" className="space-y-3">
+      <div className="flex flex-wrap gap-2">
+        {visibleItems.map((item, index) => {
+          const [itemPath, itemHash] = item.href.split('#');
+          const normalizedHash = itemHash ? `#${itemHash}` : '';
+          const isActive = normalizedHash
+            ? pathname === itemPath && currentHash === normalizedHash
+            : item.href === '/dashboard'
+              ? pathname === item.href
+              : pathname === item.href || pathname.startsWith(`${item.href}/`);
+
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              aria-current={isActive ? "page" : undefined}
               className={[
-                'flex h-6 w-6 items-center justify-center rounded-md text-xs transition-colors',
+                "group min-w-[11rem] flex-1 rounded-2xl border px-4 py-3 transition md:flex-none",
                 isActive
-                  ? 'bg-primary/15 text-primary'
-                  : 'bg-transparent text-muted-foreground group-hover:text-foreground',
-              ].join(' ')}
-              aria-hidden="true"
+                  ? "border-primary/40 bg-primary/10 text-foreground shadow-sm"
+                  : "border-border/70 bg-card/70 text-muted-foreground hover:border-foreground/15 hover:bg-accent",
+              ].join(" ")}
             >
-              {item.icon}
-            </span>
-            {item.label}
-            {isActive && (
-              <span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary" aria-hidden="true" />
-            )}
-          </Link>
-        );
-      })}
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={[
+                        "flex h-7 w-7 items-center justify-center rounded-full border",
+                        isActive
+                          ? "border-primary/30 bg-background text-primary"
+                          : "border-border bg-background text-muted-foreground group-hover:text-foreground",
+                      ].join(" ")}
+                    >
+                      <span className="text-[11px] font-semibold">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                    </span>
+                    <span
+                      className={[
+                        "truncate text-sm font-medium",
+                        isActive ? "text-foreground" : "text-foreground/90 group-hover:text-foreground",
+                      ].join(" ")}
+                    >
+                      {item.label}
+                    </span>
+                  </div>
+                  <p
+                    className={[
+                      "mt-2 truncate pl-9 text-xs uppercase tracking-[0.18em]",
+                      isActive ? "text-primary/80" : "text-muted-foreground",
+                    ].join(" ")}
+                  >
+                    {normalizedHash
+                      ? normalizedHash.replace("#", "")
+                      : itemPath
+                          .replace("/dashboard", "root")
+                          .replace(/\//g, " / ")}
+                  </p>
+                </div>
+                <span
+                  className={[
+                    "mt-1 h-2.5 w-2.5 rounded-full",
+                    isActive ? "bg-primary" : "bg-border group-hover:bg-foreground/20",
+                  ].join(" ")}
+                />
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+
+      <div className="rounded-2xl border border-border/70 bg-background/70 px-4 py-3 text-xs uppercase tracking-[0.18em] text-muted-foreground">
+        Dock shows only routes available to the active role.
+      </div>
     </nav>
   );
 }
