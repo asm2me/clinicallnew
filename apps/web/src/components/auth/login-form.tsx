@@ -78,9 +78,15 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-5 w-full rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
+    <form
+      onSubmit={onSubmit}
+      className="w-full space-y-5 rounded-[2rem] border border-[hsl(var(--border))] bg-[linear-gradient(180deg,rgba(16,16,18,0.98),rgba(8,8,10,0.96))] p-6 shadow-[0_24px_80px_-48px_rgba(0,0,0,0.72)] sm:p-8"
+    >
       <div className="space-y-2">
-        <label htmlFor="email" className="block text-sm font-medium text-foreground">
+        <label
+          htmlFor="email"
+          className="block text-sm font-medium text-foreground/95"
+        >
           Email address
         </label>
         <input
@@ -90,13 +96,16 @@ export function LoginForm() {
           onChange={(e) => setEmail(e.target.value)}
           autoComplete="email"
           placeholder="you@company.com"
-          className="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+          className="mt-2 w-full rounded-xl border border-[hsl(var(--border))] bg-[rgba(12,12,14,0.96)] px-4 py-3 text-[hsl(var(--foreground))] placeholder:text-[hsl(var(--muted-foreground))] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] outline-none transition [color-scheme:dark] focus:border-primary focus:ring-2 focus:ring-primary/20"
           required
         />
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="password" className="block text-sm font-medium text-foreground">
+        <label
+          htmlFor="password"
+          className="block text-sm font-medium text-foreground/95"
+        >
           Password
         </label>
         <input
@@ -106,21 +115,26 @@ export function LoginForm() {
           onChange={(e) => setPassword(e.target.value)}
           autoComplete="current-password"
           placeholder="Enter your password"
-          className="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+          className="mt-2 w-full rounded-xl border border-[hsl(var(--border))] bg-[rgba(12,12,14,0.96)] px-4 py-3 text-[hsl(var(--foreground))] placeholder:text-[hsl(var(--muted-foreground))] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] outline-none transition [color-scheme:dark] focus:border-primary focus:ring-2 focus:ring-primary/20"
           required
         />
       </div>
 
       {error ? (
-        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+        <div
+          role="alert"
+          className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-100"
+        >
           <p>{error}</p>
           {debugInfo && (
-            <pre className="mt-2 overflow-x-auto whitespace-pre-wrap rounded bg-red-100 p-2 text-xs text-red-800">{debugInfo}</pre>
+            <pre className="mt-3 overflow-x-auto whitespace-pre-wrap rounded-xl border border-red-400/20 bg-black/20 p-3 text-xs text-red-100/90">
+              {debugInfo}
+            </pre>
           )}
         </div>
       ) : (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-          <p className="font-medium">Development sign-in</p>
+        <div className="rounded-2xl border border-primary/25 bg-[rgba(212,175,55,0.12)] p-4 text-sm text-foreground">
+          <p className="font-medium text-primary">Development sign-in</p>
           <p className="mt-1">
             Use <span className="font-semibold">superadmin@clinicall.demo</span>,{' '}
             <span className="font-semibold">tenantadmin@clinicall.demo</span>,{' '}
@@ -136,7 +150,7 @@ export function LoginForm() {
         type="submit"
         disabled={loading}
         aria-busy={loading}
-        className="inline-flex w-full items-center justify-center rounded-lg bg-primary px-4 py-2.5 font-semibold text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex w-full items-center justify-center rounded-xl bg-primary px-4 py-3 font-semibold text-primary-foreground shadow-[0_10px_30px_-12px_rgba(212,175,55,0.5)] transition hover:-translate-y-0.5 hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? 'Signing in…' : 'Sign in to Clinicall'}
       </button>
