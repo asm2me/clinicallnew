@@ -11,6 +11,7 @@ const navItems: NavItem[] = [
   { href: '/dashboard/appointments', label: 'Appointments', icon: '📅' },
   { href: '/dashboard/patients', label: 'Patients', icon: '👤' },
   { href: '/dashboard/clinics', label: 'Clinics', icon: '🏥' },
+  { href: '/dashboard/users', label: 'Users', icon: '👥', roles: ['SUPER_ADMIN', 'TENANT_ADMIN'] },
   { href: '/dashboard/analytics', label: 'Analytics', icon: '📊' },
   { href: '/dashboard/settings#tenant-management', label: 'Tenants', icon: '🏢', roles: ['SUPER_ADMIN'] },
   { href: '/dashboard/settings', label: 'Settings', icon: '⚙️' },

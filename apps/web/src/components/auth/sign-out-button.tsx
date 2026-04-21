@@ -6,11 +6,15 @@ import { signOut } from 'next-auth/react';
 type SignOutButtonProps = {
   callbackUrl?: string;
   className?: string;
+  label?: string;
+  loadingLabel?: string;
 };
 
 export function SignOutButton({
   callbackUrl = '/login',
   className = 'odoo-button-secondary w-full justify-center',
+  label = 'Sign out',
+  loadingLabel = 'Signing out…',
 }: SignOutButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -36,7 +40,7 @@ export function SignOutButton({
       aria-busy={isLoading}
       className={className}
     >
-      {isLoading ? 'Signing out…' : 'Sign out'}
+      {isLoading ? loadingLabel : label}
     </button>
   );
 }

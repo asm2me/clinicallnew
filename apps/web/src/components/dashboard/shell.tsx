@@ -61,9 +61,6 @@ export async function DashboardShell({ title, description, role, children }: Das
               <DashboardNav role={role} />
             </div>
 
-            <div className="mt-6 border-t border-border pt-5">
-              <SignOutButton />
-            </div>
           </div>
         </aside>
 
@@ -76,16 +73,48 @@ export async function DashboardShell({ title, description, role, children }: Das
                 {description ? <p className="mt-3 text-sm leading-7 text-muted-foreground">{description}</p> : null}
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="odoo-panel min-w-[180px] p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Environment</p>
-                  <p className="mt-2 text-sm font-semibold text-foreground">Demo workspace</p>
-                  <p className="mt-1 text-xs text-muted-foreground">No backend persistence</p>
-                </div>
-                <div className="odoo-panel min-w-[180px] p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Access</p>
-                  <p className="mt-2 text-sm font-semibold text-foreground">{role}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">Role-aware sample data</p>
+              <div className="flex flex-col items-stretch gap-3 sm:items-end">
+                <details className="relative">
+                  <summary className="flex cursor-pointer list-none items-center gap-3 rounded-lg border border-border bg-background px-4 py-3 text-left shadow-sm transition hover:bg-muted">
+                    <div className="flex min-w-0 flex-col">
+                      <span className="truncate text-sm font-semibold text-foreground">
+                        {effectiveUser?.name || effectiveUser?.email || 'My account'}
+                      </span>
+                      <span className="truncate text-xs text-muted-foreground">{effectiveUser?.email || role}</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground" aria-hidden="true">
+                      ▾
+                    </span>
+                  </summary>
+
+                  <div className="absolute right-0 z-20 mt-2 w-56 rounded-lg border border-border bg-background p-2 shadow-lg">
+                    <Link
+                      href="/dashboard/my-profile"
+                      className="flex items-center rounded-md px-3 py-2 text-sm font-medium text-foreground transition hover:bg-muted"
+                    >
+                      My profile
+                    </Link>
+                    <div className="mt-1 border-t border-border pt-2">
+                      <SignOutButton
+                        className="w-full justify-start rounded-md px-3 py-2 text-sm font-medium"
+                        label="Logout"
+                        loadingLabel="Logging out…"
+                      />
+                    </div>
+                  </div>
+                </details>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="odoo-panel min-w-[180px] p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Environment</p>
+                    <p className="mt-2 text-sm font-semibold text-foreground">Demo workspace</p>
+                    <p className="mt-1 text-xs text-muted-foreground">No backend persistence</p>
+                  </div>
+                  <div className="odoo-panel min-w-[180px] p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Access</p>
+                    <p className="mt-2 text-sm font-semibold text-foreground">{role}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Role-aware sample data</p>
+                  </div>
                 </div>
               </div>
             </div>

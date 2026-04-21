@@ -10,6 +10,8 @@ import { authOptions } from '../../../lib/auth';
 import { db } from '../../../lib/db';
 
 const SETTINGS_PATH = '/dashboard/settings';
+const USERS_PATH = '/dashboard/users';
+const MY_PROFILE_PATH = '/dashboard/my-profile';
 const ADMIN_ROLES = ['SUPER_ADMIN', 'TENANT_ADMIN'] as const;
 const USER_ROLES = ['SUPER_ADMIN', 'TENANT_ADMIN', 'DOCTOR', 'STAFF', 'PATIENT'] as const;
 const TENANT_STATUSES = ['ACTIVE', 'TRIALING', 'SUSPENDED', 'ARCHIVED'] as const;
@@ -171,19 +173,19 @@ function toNullable(value: string) {
   return trimmed.length > 0 ? trimmed : null;
 }
 
-function redirectWithError(message: string): never {
-  redirect(`${SETTINGS_PATH}?error=${encodeURIComponent(message)}`);
+function redirectWithError(message: string, path = SETTINGS_PATH): never {
+  redirect(`${path}?error=${encodeURIComponent(message)}`);
 }
 
-function redirectWithMessage(message: string): never {
-  redirect(`${SETTINGS_PATH}?message=${encodeURIComponent(message)}`);
+function redirectWithMessage(message: string, path = SETTINGS_PATH): never {
+  redirect(`${path}?message=${encodeURIComponent(message)}`);
 }
 
-async function getActor(): Promise<Actor> {
+async function getActor(path = SETTINGS_PATH): Promise<Actor> {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
-    redirectWithError('You must be signed in to manage settings.');
+    redirectWithError('You must be signed in to manage settings.', path);
   }
 
   const actor = await db.user.findUnique({
@@ -191,7 +193,7 @@ async function getActor(): Promise<Actor> {
   });
 
   if (!actor) {
-    redirectWithError('Your account could not be found.');
+    redirectWithError('Your account could not be found.', path);
   }
 
   return {
@@ -202,21 +204,21 @@ async function getActor(): Promise<Actor> {
   };
 }
 
-function ensureAdmin(actor: Actor) {
+function ensureAdmin(actor: Actor, path = SETTINGS_PATH) {
   if (!ADMIN_ROLES.includes(actor.role as (typeof ADMIN_ROLES)[number])) {
-    redirectWithError('You are not allowed to manage users.');
+    redirectWithError('You are not allowed to manage users.', path);
   }
 }
 
-function ensureSuperAdmin(actor: Actor) {
+function ensureSuperAdmin(actor: Actor, path = SETTINGS_PATH) {
   if (actor.role !== 'SUPER_ADMIN') {
-    redirectWithError('Only super admins can manage tenants.');
+    redirectWithError('Only super admins can manage tenants.', path);
   }
 }
 
-function ensureTenantManager(actor: Actor) {
+function ensureTenantManager(actor: Actor, path = SETTINGS_PATH) {
   if (actor.role !== 'SUPER_ADMIN' && actor.role !== 'TENANT_ADMIN') {
-    redirectWithError('You are not allowed to manage tenant settings.');
+    redirectWithError('You are not allowed to manage tenant settings.', path);
   }
 }
 
@@ -225,10 +227,11 @@ async function resolveAssignment(
   role: (typeof USER_ROLES)[number],
   tenantIdInput: string | undefined,
   clinicIdInput: string | undefined,
+  path = SETTINGS_PATH,
 ): Promise<TargetAssignment> {
   if (role === 'SUPER_ADMIN') {
     if (actor.role !== 'SUPER_ADMIN') {
-      redirectWithError('Only super admins can create or update super admin users.');
+      redirectWithError('Only super admins can create or update super admin users.', path);
     }
 
     return { tenantId: null, clinicId: null };
@@ -240,7 +243,7 @@ async function resolveAssignment(
     tenantId = toNullable(tenantIdInput ?? '');
 
     if (!tenantId) {
-      redirectWithError('A tenant is required for this user.');
+      redirectWithError('A tenant is required for this user.', path);
     }
 
     const tenant = await db.tenant.findUnique({
@@ -248,11 +251,11 @@ async function resolveAssignment(
     });
 
     if (!tenant) {
-      redirectWithError('The selected tenant was not found.');
+      redirectWithError('The selected tenant was not found.', path);
     }
   } else {
     if (!actor.tenantId) {
-      redirectWithError('Your account is missing a tenant assignment.');
+      redirectWithError('Your account is missing a tenant assignment.', path);
     }
 
     tenantId = actor.tenantId;
@@ -269,21 +272,21 @@ async function resolveAssignment(
   });
 
   if (!clinic) {
-    redirectWithError('The selected clinic was not found.');
+    redirectWithError('The selected clinic was not found.', path);
   }
 
   const clinicTenantId = (clinic as { tenantId?: string | null }).tenantId ?? null;
 
   if (!clinicTenantId) {
-    redirectWithError('The selected clinic is missing a tenant assignment.');
+    redirectWithError('The selected clinic is missing a tenant assignment.', path);
   }
 
   if (actor.role === 'TENANT_ADMIN' && clinicTenantId !== actor.tenantId) {
-    redirectWithError('You can only assign users to clinics in your tenant.');
+    redirectWithError('You can only assign users to clinics in your tenant.', path);
   }
 
   if (tenantId && clinicTenantId !== tenantId) {
-    redirectWithError('The selected clinic does not belong to the selected tenant.');
+    redirectWithError('The selected clinic does not belong to the selected tenant.', path);
   }
 
   return {
@@ -292,13 +295,13 @@ async function resolveAssignment(
   };
 }
 
-async function getManagedUser(actor: Actor, userId: string) {
+async function getManagedUser(actor: Actor, userId: string, path = SETTINGS_PATH) {
   const user = await db.user.findUnique({
     where: { id: userId },
   });
 
   if (!user) {
-    redirectWithError('The selected user was not found.');
+    redirectWithError('The selected user was not found.', path);
   }
 
   const userRole = user.role as Actor['role'];
@@ -306,11 +309,11 @@ async function getManagedUser(actor: Actor, userId: string) {
 
   if (actor.role === 'TENANT_ADMIN') {
     if (!actor.tenantId || userTenantId !== actor.tenantId) {
-      redirectWithError('You can only manage users in your tenant.');
+        redirectWithError('You can only manage users in your tenant.', path);
     }
 
     if (userRole === 'SUPER_ADMIN') {
-      redirectWithError('Tenant admins cannot manage super admin users.');
+      redirectWithError('Tenant admins cannot manage super admin users.', path);
     }
   }
 
@@ -318,8 +321,8 @@ async function getManagedUser(actor: Actor, userId: string) {
 }
 
 export async function createTenantAction(formData: FormData): Promise<void> {
-  const actor = await getActor();
-  ensureSuperAdmin(actor);
+  const actor = await getActor(SETTINGS_PATH);
+  ensureSuperAdmin(actor, SETTINGS_PATH);
 
   const parsed = createTenantSchema.safeParse({
     name: getString(formData, 'name'),
@@ -395,8 +398,8 @@ export async function createTenantAction(formData: FormData): Promise<void> {
 }
 
 export async function updateTenantAction(formData: FormData): Promise<void> {
-  const actor = await getActor();
-  ensureTenantManager(actor);
+  const actor = await getActor(SETTINGS_PATH);
+  ensureTenantManager(actor, SETTINGS_PATH);
 
   const parsed = updateTenantSchema.safeParse({
     tenantId: getString(formData, 'tenantId'),
@@ -462,8 +465,8 @@ export async function updateTenantAction(formData: FormData): Promise<void> {
 }
 
 export async function deleteTenantAction(formData: FormData): Promise<void> {
-  const actor = await getActor();
-  ensureSuperAdmin(actor);
+  const actor = await getActor(SETTINGS_PATH);
+  ensureSuperAdmin(actor, SETTINGS_PATH);
 
   const parsed = deleteTenantSchema.safeParse({
     tenantId: getString(formData, 'tenantId'),
@@ -524,7 +527,7 @@ export async function deleteTenantAction(formData: FormData): Promise<void> {
 }
 
 export async function updateProfileAction(formData: FormData): Promise<void> {
-  const actor = await getActor();
+  const actor = await getActor(MY_PROFILE_PATH);
 
   const parsed = profileSchema.safeParse({
     name: getString(formData, 'name'),
@@ -533,7 +536,7 @@ export async function updateProfileAction(formData: FormData): Promise<void> {
   });
 
   if (!parsed.success) {
-    redirectWithError(parsed.error.issues[0]?.message ?? 'Profile details are invalid.');
+    redirectWithError(parsed.error.issues[0]?.message ?? 'Profile details are invalid.', MY_PROFILE_PATH);
   }
 
   await db.user.update({
@@ -546,12 +549,13 @@ export async function updateProfileAction(formData: FormData): Promise<void> {
   });
 
   revalidatePath(SETTINGS_PATH);
-  redirectWithMessage('Your profile was updated successfully.');
+  revalidatePath(MY_PROFILE_PATH);
+  redirectWithMessage('Your profile was updated successfully.', MY_PROFILE_PATH);
 }
 
 export async function createUserAction(formData: FormData): Promise<void> {
-  const actor = await getActor();
-  ensureAdmin(actor);
+  const actor = await getActor(USERS_PATH);
+  ensureAdmin(actor, USERS_PATH);
 
   const parsed = createUserSchema.safeParse({
     name: getString(formData, 'name'),
@@ -565,7 +569,7 @@ export async function createUserAction(formData: FormData): Promise<void> {
   });
 
   if (!parsed.success) {
-    redirectWithError(parsed.error.issues[0]?.message ?? 'User details are invalid.');
+    redirectWithError(parsed.error.issues[0]?.message ?? 'User details are invalid.', USERS_PATH);
   }
 
   const assignment = await resolveAssignment(
@@ -573,6 +577,7 @@ export async function createUserAction(formData: FormData): Promise<void> {
     parsed.data.role,
     parsed.data.tenantId,
     parsed.data.clinicId,
+    USERS_PATH,
   );
 
   try {
@@ -590,16 +595,17 @@ export async function createUserAction(formData: FormData): Promise<void> {
     });
   } catch (error) {
     console.error('createUserAction failed', error);
-    redirectWithError('The user could not be created. Check for duplicate email addresses or invalid assignments.');
+    redirectWithError('The user could not be created. Check for duplicate email addresses or invalid assignments.', USERS_PATH);
   }
 
   revalidatePath(SETTINGS_PATH);
-  redirectWithMessage('User created successfully.');
+  revalidatePath(USERS_PATH);
+  redirectWithMessage('User created successfully.', USERS_PATH);
 }
 
 export async function updateUserAction(formData: FormData): Promise<void> {
-  const actor = await getActor();
-  ensureAdmin(actor);
+  const actor = await getActor(USERS_PATH);
+  ensureAdmin(actor, USERS_PATH);
 
   const parsed = updateUserSchema.safeParse({
     userId: getString(formData, 'userId'),
@@ -614,19 +620,20 @@ export async function updateUserAction(formData: FormData): Promise<void> {
   });
 
   if (!parsed.success) {
-    redirectWithError(parsed.error.issues[0]?.message ?? 'User details are invalid.');
+    redirectWithError(parsed.error.issues[0]?.message ?? 'User details are invalid.', USERS_PATH);
   }
 
-  const existingUser = await getManagedUser(actor, parsed.data.userId);
+  const existingUser = await getManagedUser(actor, parsed.data.userId, USERS_PATH);
   const assignment = await resolveAssignment(
     actor,
     parsed.data.role,
     parsed.data.tenantId,
     parsed.data.clinicId,
+    USERS_PATH,
   );
 
   if (actor.role === 'TENANT_ADMIN' && existingUser.id === actor.id && parsed.data.role !== 'TENANT_ADMIN') {
-    redirectWithError('Tenant admins cannot change their own role from this screen.');
+    redirectWithError('Tenant admins cannot change their own role from this screen.', USERS_PATH);
   }
 
   const password = parsed.data.password?.trim();
@@ -642,7 +649,7 @@ export async function updateUserAction(formData: FormData): Promise<void> {
 
   if (password) {
     if (password.length < 6) {
-      redirectWithError('Password must be at least 6 characters.');
+      redirectWithError('Password must be at least 6 characters.', USERS_PATH);
     }
 
     data.hashedPassword = await hash(password, 10);
@@ -655,16 +662,17 @@ export async function updateUserAction(formData: FormData): Promise<void> {
     });
   } catch (error) {
     console.error('updateUserAction failed', error);
-    redirectWithError('The user could not be updated. Check for duplicate email addresses or invalid assignments.');
+    redirectWithError('The user could not be updated. Check for duplicate email addresses or invalid assignments.', USERS_PATH);
   }
 
   revalidatePath(SETTINGS_PATH);
-  redirectWithMessage('User updated successfully.');
+  revalidatePath(USERS_PATH);
+  redirectWithMessage('User updated successfully.', USERS_PATH);
 }
 
 export async function deleteUserAction(formData: FormData): Promise<void> {
-  const actor = await getActor();
-  ensureAdmin(actor);
+  const actor = await getActor(USERS_PATH);
+  ensureAdmin(actor, USERS_PATH);
 
   const parsed = deleteUserSchema.safeParse({
     userId: getString(formData, 'userId'),
@@ -672,23 +680,23 @@ export async function deleteUserAction(formData: FormData): Promise<void> {
   });
 
   if (!parsed.success) {
-    redirectWithError(parsed.error.issues[0]?.message ?? 'Delete confirmation is invalid.');
+    redirectWithError(parsed.error.issues[0]?.message ?? 'Delete confirmation is invalid.', USERS_PATH);
   }
 
   if (parsed.data.userId === actor.id) {
-    redirectWithError('You cannot delete your own account.');
+    redirectWithError('You cannot delete your own account.', USERS_PATH);
   }
 
-  const existingUser = await getManagedUser(actor, parsed.data.userId);
+  const existingUser = await getManagedUser(actor, parsed.data.userId, USERS_PATH);
 
   if (existingUser.role === 'SUPER_ADMIN') {
-    redirectWithError('Super admin users cannot be deleted.');
+    redirectWithError('Super admin users cannot be deleted.', USERS_PATH);
   }
 
   const expectedConfirmation = existingUser.email.toLowerCase();
 
   if (parsed.data.confirmationText.trim().toLowerCase() !== expectedConfirmation) {
-    redirectWithError(`Type ${existingUser.email} exactly to confirm deletion.`);
+    redirectWithError(`Type ${existingUser.email} exactly to confirm deletion.`, USERS_PATH);
   }
 
   try {
@@ -723,9 +731,10 @@ export async function deleteUserAction(formData: FormData): Promise<void> {
     });
   } catch (error) {
     console.error('deleteUserAction failed', error);
-    redirectWithError('The user and related records could not be deleted.');
+    redirectWithError('The user and related records could not be deleted.', USERS_PATH);
   }
 
   revalidatePath(SETTINGS_PATH);
-  redirectWithMessage('User and related records deleted successfully.');
+  revalidatePath(USERS_PATH);
+  redirectWithMessage('User and related records deleted successfully.', USERS_PATH);
 }
