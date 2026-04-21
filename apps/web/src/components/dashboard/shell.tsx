@@ -91,7 +91,7 @@ export async function DashboardShell({ title, description, role, children }: Das
         </aside>
 
         <div className="min-w-0 flex-1">
-          <header className="odoo-card mb-6 p-6">
+          <header className="odoo-card relative z-30 mb-6 overflow-visible p-6">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
               <div className="max-w-3xl">
                 <p className="text-sm font-semibold uppercase tracking-[0.24em] text-primary">Clinic SaaS dashboard</p>
@@ -99,8 +99,8 @@ export async function DashboardShell({ title, description, role, children }: Das
                 {description ? <p className="mt-3 text-sm leading-7 text-muted-foreground">{description}</p> : null}
               </div>
 
-              <div className="flex flex-col items-stretch gap-3 sm:items-end">
-                <details className="relative">
+              <div className="relative z-50 flex flex-col items-stretch gap-3 sm:items-end">
+                <details className="relative z-50">
                   <summary className="flex cursor-pointer list-none items-center gap-3 rounded-lg border border-border bg-background px-4 py-3 text-left shadow-sm transition hover:bg-muted">
                     <div className="flex min-w-0 flex-col">
                       <span className="truncate text-sm font-semibold text-foreground">
@@ -113,7 +113,7 @@ export async function DashboardShell({ title, description, role, children }: Das
                     </span>
                   </summary>
 
-                  <div className="absolute right-0 z-20 mt-2 w-56 rounded-lg border border-border bg-background p-2 shadow-lg">
+                  <div className="absolute right-0 z-[100] mt-2 w-56 rounded-lg border border-border bg-background p-2 shadow-lg">
                     <Link
                       href="/dashboard/my-profile"
                       className="flex items-center rounded-md px-3 py-2 text-sm font-medium text-foreground transition hover:bg-muted"
