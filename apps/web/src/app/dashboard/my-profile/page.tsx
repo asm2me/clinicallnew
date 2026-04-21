@@ -1,11 +1,9 @@
 import { redirect } from 'next/navigation';
-import { getServerSession } from 'next-auth';
 
 import {
   crudInputClassName,
 } from '@/components/dashboard/crud-form-template';
 import { DashboardShell } from '@/components/dashboard/shell';
-import { authOptions } from '@/lib/auth';
 import { getSettingsData } from '@/lib/queries/settings';
 
 import { updateProfileAction } from '../settings/actions';
@@ -31,13 +29,11 @@ function statusTooltip(action: string, subject: string) {
 }
 
 export default async function MyProfilePage({ searchParams }: MyProfilePageProps) {
-  const session = await getServerSession(authOptions);
+  const data = await getSettingsData();
 
-  if (!session?.user?.id) {
+  if (!data?.profile?.id) {
     redirect('/login');
   }
-
-  const data = await getSettingsData(session.user.id);
   const message = getParamValue(searchParams?.message);
   const error = getParamValue(searchParams?.error);
 
@@ -45,7 +41,7 @@ export default async function MyProfilePage({ searchParams }: MyProfilePageProps
     <DashboardShell
       title="My profile"
       description="Update your personal details and review your assigned workspace access."
-      role={session.user.role as string}
+      role={data.profile.role}
     >
       <div className="space-y-6">
         {message ? (

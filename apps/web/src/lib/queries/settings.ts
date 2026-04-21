@@ -1,10 +1,17 @@
 import { db } from '../db';
+import { getEffectiveDashboardUser } from '../impersonation';
 
 const ADMIN_ROLES = ['SUPER_ADMIN', 'TENANT_ADMIN'] as const;
 
-export async function getSettingsData(userId: string) {
+export async function getSettingsData() {
+  const actor = await getEffectiveDashboardUser();
+
+  if (!actor) {
+    throw new Error('Current user not found.');
+  }
+
   const currentUser = await db.user.findUnique({
-    where: { id: userId },
+    where: { id: actor.id },
     include: {
       tenant: true,
       clinic: {
@@ -19,16 +26,11 @@ export async function getSettingsData(userId: string) {
     throw new Error('Current user not found.');
   }
 
-  const role = String(currentUser.role) as
-    | 'SUPER_ADMIN'
-    | 'TENANT_ADMIN'
-    | 'DOCTOR'
-    | 'STAFF'
-    | 'PATIENT';
+  const role = actor.role;
 
   const canManageUsers = ADMIN_ROLES.includes(role as (typeof ADMIN_ROLES)[number]);
 
-  const scopedTenantId = (currentUser as { tenantId?: string | null }).tenantId ?? null;
+  const scopedTenantId = actor.tenantId ?? null;
 
   const userWhere =
     role === 'SUPER_ADMIN'

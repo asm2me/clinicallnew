@@ -33,11 +33,37 @@ const roleTone: Record<string, RoleToneConfig> = {
 
 export async function DashboardShell({ title, description, role, children }: DashboardShellProps) {
   const effectiveUser = await getEffectiveDashboardUser();
+  const effectiveRole = effectiveUser?.role || role;
   const impersonationName = effectiveUser?.name || effectiveUser?.email || 'selected user';
+  const tone = roleTone[effectiveRole] ?? roleTone.STAFF;
 
   return (
     <div className="odoo-shell min-h-screen">
-      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 lg:flex-row lg:px-8">
+      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-4 sm:px-6 lg:px-8">
+        {effectiveUser?.isImpersonating ? (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-900">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div>
+                <div className="font-semibold">Impersonation mode active</div>
+                <div className="mt-1 text-amber-800">
+                  You are viewing the dashboard as {impersonationName}. Stop impersonation to return to your
+                  super admin account.
+                </div>
+              </div>
+
+              <form action={stopUserImpersonationAction}>
+                <button
+                  type="submit"
+                  className="inline-flex items-center justify-center rounded-md border border-amber-300 bg-white px-3 py-2 text-sm font-medium text-amber-900 transition hover:bg-amber-100"
+                >
+                  Return to super admin
+                </button>
+              </form>
+            </div>
+          </div>
+        ) : null}
+
+        <div className="flex flex-col gap-6 lg:flex-row">
         <aside className="w-full shrink-0 lg:w-72">
           <div className="odoo-card sticky top-6 p-5">
             <div className="border-b border-border pb-5">
@@ -51,14 +77,14 @@ export async function DashboardShell({ title, description, role, children }: Das
 
             <div className="mt-5">
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">Workspace role</p>
-              <div className={`mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold ${roleTone[role].bg} ${roleTone[role].text}`}>
-                <span className={`h-2 w-2 rounded-full ${roleTone[role].dot}`} aria-hidden="true" />
-                {role}
+              <div className={`mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold ${tone.bg} ${tone.text}`}>
+                <span className={`h-2 w-2 rounded-full ${tone.dot}`} aria-hidden="true" />
+                {effectiveRole}
               </div>
             </div>
 
             <div className="mt-6">
-              <DashboardNav role={role} />
+              <DashboardNav role={effectiveRole} />
             </div>
 
           </div>
@@ -80,7 +106,7 @@ export async function DashboardShell({ title, description, role, children }: Das
                       <span className="truncate text-sm font-semibold text-foreground">
                         {effectiveUser?.name || effectiveUser?.email || 'My account'}
                       </span>
-                      <span className="truncate text-xs text-muted-foreground">{effectiveUser?.email || role}</span>
+                      <span className="truncate text-xs text-muted-foreground">{effectiveUser?.email || effectiveRole}</span>
                     </div>
                     <span className="text-xs text-muted-foreground" aria-hidden="true">
                       ▾
@@ -112,7 +138,7 @@ export async function DashboardShell({ title, description, role, children }: Das
                   </div>
                   <div className="odoo-panel min-w-[180px] p-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Access</p>
-                    <p className="mt-2 text-sm font-semibold text-foreground">{role}</p>
+                    <p className="mt-2 text-sm font-semibold text-foreground">{effectiveRole}</p>
                     <p className="mt-1 text-xs text-muted-foreground">Role-aware sample data</p>
                   </div>
                 </div>
@@ -120,32 +146,8 @@ export async function DashboardShell({ title, description, role, children }: Das
             </div>
           </header>
 
-          <div className="space-y-6">
-            {effectiveUser?.isImpersonating ? (
-              <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-900">
-                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                  <div>
-                    <div className="font-semibold">Impersonation mode active</div>
-                    <div className="mt-1 text-amber-800">
-                      You are viewing the dashboard as {impersonationName}. Stop impersonation to return to your
-                      super admin account.
-                    </div>
-                  </div>
-
-                  <form action={stopUserImpersonationAction}>
-                    <button
-                      type="submit"
-                      className="inline-flex items-center justify-center rounded-md border border-amber-300 bg-white px-3 py-2 text-sm font-medium text-amber-900 transition hover:bg-amber-100"
-                    >
-                      Return to super admin
-                    </button>
-                  </form>
-                </div>
-              </div>
-            ) : null}
-
-            <div>{children}</div>
-          </div>
+          <div>{children}</div>
+        </div>
         </div>
       </div>
     </div>

@@ -1,5 +1,4 @@
 import { redirect } from 'next/navigation';
-import { getServerSession } from 'next-auth';
 
 import {
   CrudFormActions,
@@ -10,7 +9,6 @@ import {
   crudSelectClassName,
 } from '../../../components/dashboard/crud-form-template';
 import { DashboardShell } from '../../../components/dashboard/shell';
-import { authOptions } from '../../../lib/auth';
 import { getSettingsData } from '../../../lib/queries/settings';
 import {
   createTenantAction,
@@ -49,13 +47,11 @@ function statusTooltip(action: string, subject: string) {
 }
 
 export default async function SettingsPage({ searchParams }: SettingsPageProps) {
-  const session = await getServerSession(authOptions);
+  const data = await getSettingsData();
 
-  if (!session?.user?.id) {
+  if (!data?.profile?.id) {
     redirect('/login');
   }
-
-  const data = await getSettingsData(session.user.id);
   const message = getParamValue(searchParams?.message);
   const error = getParamValue(searchParams?.error);
 
@@ -63,7 +59,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
     <DashboardShell
       title="Settings"
       description="Manage tenant workspace configuration and administrative access."
-      role={session.user.role as string}
+      role={data.profile.role}
     >
       <div className="space-y-6">
         {message ? (

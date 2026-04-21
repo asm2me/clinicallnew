@@ -3,11 +3,10 @@
 import { hash } from 'bcryptjs';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { getServerSession } from 'next-auth';
 import { z } from 'zod';
 
-import { authOptions } from '../../../lib/auth';
 import { db } from '../../../lib/db';
+import { getEffectiveDashboardUser } from '../../../lib/impersonation';
 
 const SETTINGS_PATH = '/dashboard/settings';
 const USERS_PATH = '/dashboard/users';
@@ -182,25 +181,17 @@ function redirectWithMessage(message: string, path = SETTINGS_PATH): never {
 }
 
 async function getActor(path = SETTINGS_PATH): Promise<Actor> {
-  const session = await getServerSession(authOptions);
+  const effectiveUser = await getEffectiveDashboardUser();
 
-  if (!session?.user?.id) {
+  if (!effectiveUser?.id) {
     redirectWithError('You must be signed in to manage settings.', path);
   }
 
-  const actor = await db.user.findUnique({
-    where: { id: session.user.id },
-  });
-
-  if (!actor) {
-    redirectWithError('Your account could not be found.', path);
-  }
-
   return {
-    id: actor.id,
-    role: actor.role as Actor['role'],
-    tenantId: (actor as { tenantId?: string | null }).tenantId ?? null,
-    clinicId: (actor as { clinicId?: string | null }).clinicId ?? null,
+    id: effectiveUser.id,
+    role: effectiveUser.role as Actor['role'],
+    tenantId: effectiveUser.tenantId ?? null,
+    clinicId: effectiveUser.clinicId ?? null,
   };
 }
 
