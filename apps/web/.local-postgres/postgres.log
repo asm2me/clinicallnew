@@ -8,3 +8,9 @@
 	
 2026-04-21 18:11:41.309 EET [25148] LOG:  checkpoint starting: time
 2026-04-21 18:13:38.452 EET [25148] LOG:  checkpoint complete: wrote 1095 buffers (6.7%); 0 WAL file(s) added, 0 removed, 0 recycled; write=116.494 s, sync=0.630 s, total=117.144 s; sync files=368, longest=0.008 s, average=0.002 s; distance=5076 kB, estimate=5076 kB; lsn=0/1A6D260, redo lsn=0/1A6C738
+2026-04-21 20:49:25.502 EET [21576] LOG:  server process (PID 27984) was terminated by exception 0xC000013A
+2026-04-21 20:49:25.502 EET [21576] DETAIL:  Failed process was running: SELECT "public"."Tenant"."id", "public"."Tenant"."name", "public"."Tenant"."slug", "public"."Tenant"."status", "public"."Tenant"."websiteName", "public"."Tenant"."supportEmail", "public"."Tenant"."supportPhone", "public"."Tenant"."timezone", "public"."Tenant"."locale", "public"."Tenant"."subscriptionPlan", "public"."Tenant"."subscriptionStatus", "public"."Tenant"."trialEndsAt", "public"."Tenant"."metadata", "public"."Tenant"."isActive", "public"."Tenant"."createdAt", "public"."Tenant"."updatedAt" FROM "public"."Tenant" WHERE "public"."Tenant"."id" IN ($1,$2) OFFSET $3
+2026-04-21 20:49:25.502 EET [21576] HINT:  See C include file "ntstatus.h" for a description of the hexadecimal value.
+2026-04-21 20:49:25.502 EET [21576] LOG:  terminating any other active server processes
+2026-04-21 20:49:25.722 EET [21576] LOG:  received fast shutdown request
+^C
