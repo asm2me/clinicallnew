@@ -42,12 +42,12 @@ function buildPatientWhere(actor: Actor) {
     return actor.tenantId ? { tenantId: actor.tenantId } : { id: '__no_access__' };
   }
 
-  if (actor.role === 'DOCTOR' || actor.role === 'STAFF') {
+  if (actor.role === 'DOCTOR') {
     return actor.clinicId ? { clinicId: actor.clinicId } : { id: '__no_access__' };
   }
 
-  if (actor.role === 'PATIENT') {
-    return actor.email ? { email: actor.email } : { id: '__no_access__' };
+  if (actor.role === 'STAFF' || actor.role === 'PATIENT') {
+    return { id: '__no_access__' };
   }
 
   return { id: '__no_access__' };
@@ -62,7 +62,7 @@ function buildClinicWhere(actor: Actor) {
     return actor.tenantId ? { tenantId: actor.tenantId } : { id: '__no_access__' };
   }
 
-  if (actor.role === 'DOCTOR' || actor.role === 'STAFF') {
+  if (actor.role === 'DOCTOR') {
     return actor.clinicId ? { id: actor.clinicId } : { id: '__no_access__' };
   }
 
@@ -181,7 +181,8 @@ export async function getPatientsData(userId: string) {
 
   return {
     role: actor.role,
-    canMutate: actor.role !== 'PATIENT',
+    canMutate:
+      actor.role === 'SUPER_ADMIN' || actor.role === 'TENANT_ADMIN' || actor.role === 'DOCTOR',
     stats: {
       totalPatients,
       activePatients,

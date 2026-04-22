@@ -12,7 +12,8 @@ import {
   crudTextAreaClassName,
 } from '@/components/dashboard/crud-form-template';
 import { DashboardShell } from '@/components/dashboard/shell';
-import { authOptions } from '@/lib/auth';
+import { authOptions, type AppRole } from '@/lib/auth';
+import { canAccessDashboardSection } from '@/lib/permissions';
 import { getPatientsData } from '@/lib/queries/patients';
 
 import {
@@ -96,6 +97,18 @@ function FormField({
   );
 }
 
+function buttonClassName(variant: 'primary' | 'secondary' | 'danger' = 'primary') {
+  if (variant === 'secondary') {
+    return 'odoo-button-secondary';
+  }
+
+  if (variant === 'danger') {
+    return 'inline-flex items-center justify-center rounded-xl border border-rose-400/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,241,242,0.95))] px-3 py-2.5 text-sm font-medium text-rose-700 shadow-[0_5px_0_rgba(251,113,133,0.38),0_14px_24px_-18px_rgba(136,19,55,0.3)] transition hover:-translate-y-0.5 hover:bg-[linear-gradient(180deg,rgba(255,255,255,1),rgba(255,228,230,0.96))] hover:shadow-[0_7px_0_rgba(251,113,133,0.42),0_18px_28px_-18px_rgba(136,19,55,0.34)] active:translate-y-[3px] active:shadow-[0_2px_0_rgba(251,113,133,0.38)]';
+  }
+
+  return 'btn-primary rounded-xl px-4 py-2.5';
+}
+
 export default async function PatientsPage({ searchParams }: PatientsPageProps) {
   const session = await getServerSession(authOptions);
 
@@ -103,11 +116,17 @@ export default async function PatientsPage({ searchParams }: PatientsPageProps) 
     redirect('/login');
   }
 
+  const role = session.user.role as AppRole;
+
+  if (!canAccessDashboardSection(role, 'patients')) {
+    redirect('/dashboard?error=You%20do%20not%20have%20permission%20to%20view%20patients.');
+  }
+
   const data = await getPatientsData(session.user.id);
   const canCreate = data.canMutate && data.clinicOptions.length > 0;
 
   return (
-    <DashboardShell role={session.user.role as string}>
+    <DashboardShell role={role}>
       <div className="space-y-6">
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-semibold text-slate-900">Patients</h1>
@@ -193,7 +212,7 @@ export default async function PatientsPage({ searchParams }: PatientsPageProps) 
 
                     <CrudFormActions>
                       <button
-                        className="inline-flex items-center rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
+                        className={buttonClassName()}
                         type="submit"
                       >
                         Create patient
@@ -328,7 +347,7 @@ export default async function PatientsPage({ searchParams }: PatientsPageProps) 
 
                                 <CrudFormActions>
                                   <button
-                                    className="inline-flex items-center justify-center rounded-lg bg-sky-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
+                                    className={buttonClassName('secondary')}
                                     type="submit"
                                   >
                                     Save changes
@@ -340,7 +359,7 @@ export default async function PatientsPage({ searchParams }: PatientsPageProps) 
                             <form action={deletePatientAction}>
                               <input name="id" type="hidden" value={patient.id} />
                               <button
-                                className="inline-flex items-center justify-center rounded-lg border border-rose-200 px-3 py-2 text-sm font-medium text-rose-600 transition hover:bg-rose-50"
+                                className={buttonClassName('danger')}
                                 type="submit"
                               >
                                 Delete patient

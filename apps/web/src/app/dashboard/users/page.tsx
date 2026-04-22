@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { getServerSession } from 'next-auth';
 
 import {
   CrudFormActions,
@@ -9,6 +10,8 @@ import {
   crudSelectClassName,
 } from '@/components/dashboard/crud-form-template';
 import { DashboardShell } from '@/components/dashboard/shell';
+import { authOptions, type AppRole } from '@/lib/auth';
+import { canAccessDashboardSection } from '@/lib/permissions';
 import { getUsersPageData } from '@/lib/queries/users';
 
 import {
@@ -32,18 +35,18 @@ function getParamValue(value: string | string[] | undefined) {
 
 function buttonClassName(variant: 'primary' | 'secondary' | 'danger' | 'warning' = 'primary') {
   if (variant === 'secondary') {
-    return 'inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50';
+    return 'odoo-button-secondary';
   }
 
   if (variant === 'danger') {
-    return 'inline-flex items-center justify-center rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 transition hover:bg-red-100';
+    return 'inline-flex items-center justify-center rounded-xl border border-rose-400/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,241,242,0.95))] px-3 py-2.5 text-sm font-medium text-rose-700 shadow-[0_5px_0_rgba(251,113,133,0.38),0_14px_24px_-18px_rgba(136,19,55,0.3)] transition hover:-translate-y-0.5 hover:bg-[linear-gradient(180deg,rgba(255,255,255,1),rgba(255,228,230,0.96))] hover:shadow-[0_7px_0_rgba(251,113,133,0.42),0_18px_28px_-18px_rgba(136,19,55,0.34)] active:translate-y-[3px] active:shadow-[0_2px_0_rgba(251,113,133,0.38)]';
   }
 
   if (variant === 'warning') {
-    return 'inline-flex items-center justify-center rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800 transition hover:bg-amber-100';
+    return 'inline-flex items-center justify-center rounded-xl border border-amber-400/35 bg-[linear-gradient(180deg,rgba(255,251,235,0.98),rgba(254,243,199,0.95))] px-3 py-2.5 text-sm font-medium text-amber-800 shadow-[0_5px_0_rgba(245,158,11,0.34),0_14px_24px_-18px_rgba(146,64,14,0.28)] transition hover:-translate-y-0.5 hover:bg-[linear-gradient(180deg,rgba(255,251,235,1),rgba(253,230,138,0.96))] hover:shadow-[0_7px_0_rgba(245,158,11,0.38),0_18px_28px_-18px_rgba(146,64,14,0.32)] active:translate-y-[3px] active:shadow-[0_2px_0_rgba(245,158,11,0.34)]';
   }
 
-  return 'inline-flex items-center justify-center rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-slate-700';
+  return 'btn-primary rounded-xl px-4 py-2.5';
 }
 
 function statusTooltip(action: string, subject: string) {
@@ -51,11 +54,19 @@ function statusTooltip(action: string, subject: string) {
 }
 
 export default async function UsersPage({ searchParams }: UsersPageProps) {
-  const data = await getUsersPageData();
+  const session = await getServerSession(authOptions);
 
-  if (!data) {
+  if (!session?.user?.id) {
     redirect('/login');
   }
+
+  const role = session.user.role as AppRole;
+
+  if (!canAccessDashboardSection(role, 'users')) {
+    redirect('/dashboard?error=You%20do%20not%20have%20permission%20to%20manage%20users.');
+  }
+
+  const data = await getUsersPageData();
 
   const message = getParamValue(searchParams?.message);
   const error = getParamValue(searchParams?.error);
@@ -64,7 +75,7 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
     <DashboardShell
       title="Users"
       description="Create, update, impersonate, and manage users within your allowed scope."
-      role={data.actor.role}
+      role={role}
     >
       <div className="space-y-6">
         {message ? (

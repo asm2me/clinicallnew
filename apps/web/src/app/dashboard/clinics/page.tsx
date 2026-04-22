@@ -11,7 +11,8 @@ import {
   crudSelectClassName,
 } from '@/components/dashboard/crud-form-template';
 import { DashboardShell } from '@/components/dashboard/shell';
-import { authOptions } from '@/lib/auth';
+import { authOptions, type AppRole } from '@/lib/auth';
+import { canAccessDashboardSection } from '@/lib/permissions';
 import { getClinicsData } from '@/lib/queries/clinics';
 import { statusBadge } from '@/lib/status-badge';
 
@@ -41,14 +42,14 @@ function getParamValue(value?: string | string[]) {
 
 function buttonClassName(variant: 'primary' | 'secondary' | 'danger' = 'primary') {
   if (variant === 'secondary') {
-    return 'inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50';
+    return 'odoo-button-secondary';
   }
 
   if (variant === 'danger') {
-    return 'inline-flex items-center justify-center rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 transition hover:bg-red-100';
+    return 'inline-flex items-center justify-center rounded-xl border border-rose-400/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,241,242,0.95))] px-3 py-2.5 text-sm font-medium text-rose-700 shadow-[0_5px_0_rgba(251,113,133,0.38),0_14px_24px_-18px_rgba(136,19,55,0.3)] transition hover:-translate-y-0.5 hover:bg-[linear-gradient(180deg,rgba(255,255,255,1),rgba(255,228,230,0.96))] hover:shadow-[0_7px_0_rgba(251,113,133,0.42),0_18px_28px_-18px_rgba(136,19,55,0.34)] active:translate-y-[3px] active:shadow-[0_2px_0_rgba(251,113,133,0.38)]';
   }
 
-  return 'inline-flex items-center justify-center rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-slate-700';
+  return 'btn-primary rounded-xl px-4 py-2.5';
 }
 
 export default async function ClinicsPage({ searchParams }: ClinicsPageProps) {
@@ -58,17 +59,23 @@ export default async function ClinicsPage({ searchParams }: ClinicsPageProps) {
     redirect('/login');
   }
 
+  const role = session.user.role as AppRole;
+
+  if (!canAccessDashboardSection(role, 'clinics')) {
+    redirect('/dashboard?error=You%20do%20not%20have%20permission%20to%20view%20clinics.');
+  }
+
   const data = await getClinicsData(session.user.id);
   const message = getParamValue(searchParams?.message);
   const error = getParamValue(searchParams?.error);
   const canManageClinics = data.canManageClinics;
-  const isSuperAdmin = session.user.role === 'SUPER_ADMIN';
+  const isSuperAdmin = role === 'SUPER_ADMIN';
 
   return (
     <DashboardShell
       title="Clinics"
       description="Oversee branches, locations, and operational readiness across the tenant."
-      role={session.user.role as string}
+      role={role}
     >
       {message ? (
         <div className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
@@ -514,7 +521,7 @@ export default async function ClinicsPage({ searchParams }: ClinicsPageProps) {
                           <input type="hidden" name="id" value={item.id} />
                           <button
                             type="submit"
-                            className="inline-flex items-center justify-center rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 transition hover:bg-red-100"
+                            className={buttonClassName('danger')}
                           >
                             Delete clinic
                           </button>

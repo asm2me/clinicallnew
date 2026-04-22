@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth';
 
 import { DashboardShell } from '@/components/dashboard/shell';
 import { getAnalyticsData } from '@/lib/queries/analytics';
+import { canAccessDashboardSection } from '@/lib/permissions';
 import { authOptions, type AppRole } from '@/lib/auth';
 
 export const metadata: Metadata = {
@@ -17,13 +18,19 @@ export default async function AnalyticsPage() {
     redirect('/login');
   }
 
+  const role = session.user.role as AppRole;
+
+  if (!canAccessDashboardSection(role, 'analytics')) {
+    redirect('/dashboard?error=You%20do%20not%20have%20permission%20to%20view%20analytics.');
+  }
+
   const data = await getAnalyticsData(session.user.id);
 
   return (
     <DashboardShell
       title="Analytics"
       description="Operational trends, performance metrics, and conversion health."
-      role={session.user.role as AppRole}
+      role={role}
     >
 
       <div className="grid gap-6 lg:grid-cols-4">

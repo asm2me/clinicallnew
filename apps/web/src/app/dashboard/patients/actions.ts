@@ -97,7 +97,7 @@ async function getActor() {
 }
 
 function ensureMutationRole(actor: Actor) {
-  if (actor.role === 'PATIENT') {
+  if (actor.role === 'PATIENT' || actor.role === 'STAFF') {
     redirectWith('error', 'You are not allowed to manage patients.');
   }
 
@@ -105,7 +105,7 @@ function ensureMutationRole(actor: Actor) {
     redirectWith('error', 'Your account is not linked to a tenant.');
   }
 
-  if ((actor.role === 'DOCTOR' || actor.role === 'STAFF') && !actor.clinicId) {
+  if (actor.role === 'DOCTOR' && !actor.clinicId) {
     redirectWith('error', 'Your account is not linked to a clinic.');
   }
 
@@ -113,7 +113,7 @@ function ensureMutationRole(actor: Actor) {
 }
 
 async function getScopedClinic(actor: Actor, clinicId: string) {
-  if (actor.role === 'DOCTOR' || actor.role === 'STAFF') {
+  if (actor.role === 'DOCTOR') {
     if (!actor.clinicId || actor.clinicId !== clinicId) {
       redirectWith('error', 'You can only manage patients in your own clinic.');
     }
@@ -123,7 +123,7 @@ async function getScopedClinic(actor: Actor, clinicId: string) {
     where: {
       id: clinicId,
       ...(actor.role === 'TENANT_ADMIN' ? { tenantId: actor.tenantId ?? '__no_access__' } : {}),
-      ...(actor.role === 'DOCTOR' || actor.role === 'STAFF'
+      ...(actor.role === 'DOCTOR'
         ? {
             id: actor.clinicId ?? '__no_access__',
           }
@@ -148,12 +148,12 @@ async function getScopedPatient(actor: Actor, id: string) {
     where: {
       id,
       ...(actor.role === 'TENANT_ADMIN' ? { tenantId: actor.tenantId ?? '__no_access__' } : {}),
-      ...(actor.role === 'DOCTOR' || actor.role === 'STAFF'
+      ...(actor.role === 'DOCTOR'
         ? {
             clinicId: actor.clinicId ?? '__no_access__',
           }
         : {}),
-      ...(actor.role === 'PATIENT' ? { id: '__forbidden__' } : {}),
+      ...(actor.role === 'PATIENT' || actor.role === 'STAFF' ? { id: '__forbidden__' } : {}),
     },
     select: {
       id: true,

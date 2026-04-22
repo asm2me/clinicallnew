@@ -13,10 +13,10 @@ export type DashboardSection =
 const SECTION_ACCESS: Record<DashboardSection, readonly AppRole[]> = {
   overview: ['SUPER_ADMIN', 'TENANT_ADMIN', 'DOCTOR', 'STAFF', 'PATIENT'],
   appointments: ['SUPER_ADMIN', 'TENANT_ADMIN', 'DOCTOR', 'STAFF'],
-  patients: ['SUPER_ADMIN', 'TENANT_ADMIN', 'DOCTOR', 'STAFF', 'PATIENT'],
-  clinics: ['SUPER_ADMIN', 'TENANT_ADMIN', 'DOCTOR', 'STAFF'],
+  patients: ['SUPER_ADMIN', 'TENANT_ADMIN', 'DOCTOR'],
+  clinics: ['SUPER_ADMIN', 'TENANT_ADMIN'],
   users: ['SUPER_ADMIN', 'TENANT_ADMIN'],
-  analytics: ['SUPER_ADMIN', 'TENANT_ADMIN', 'DOCTOR', 'STAFF'],
+  analytics: ['SUPER_ADMIN', 'TENANT_ADMIN', 'DOCTOR'],
   settings: ['SUPER_ADMIN', 'TENANT_ADMIN', 'DOCTOR', 'STAFF', 'PATIENT'],
   tenants: ['SUPER_ADMIN'],
 };
@@ -26,11 +26,11 @@ export function canAccessDashboardSection(role: AppRole, section: DashboardSecti
 }
 
 export function canManageAppointments(role: AppRole): boolean {
-  return canAccessDashboardSection(role, 'appointments');
+  return role !== 'PATIENT';
 }
 
 export function canManagePatients(role: AppRole): boolean {
-  return role !== 'PATIENT';
+  return role === 'SUPER_ADMIN' || role === 'TENANT_ADMIN' || role === 'DOCTOR';
 }
 
 export function canViewPatients(role: AppRole): boolean {
@@ -50,7 +50,7 @@ export function canViewAnalytics(role: AppRole): boolean {
 }
 
 export function canManageUsers(role: AppRole): boolean {
-  return canAccessDashboardSection(role, 'users');
+  return role === 'SUPER_ADMIN' || role === 'TENANT_ADMIN';
 }
 
 export function canManageTenants(role: AppRole): boolean {

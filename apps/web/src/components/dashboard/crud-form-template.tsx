@@ -24,18 +24,18 @@ type CrudFormActionsProps = {
 
 export function crudPopupTriggerClassName(variant: ButtonVariant = 'primary') {
   if (variant === 'secondary') {
-    return 'inline-flex items-center justify-center rounded-xl border border-border/70 bg-card/90 px-3 py-2 text-sm font-medium text-foreground transition hover:bg-accent hover:text-foreground';
+    return 'odoo-button-secondary';
   }
 
   if (variant === 'danger') {
-    return 'inline-flex items-center justify-center rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm font-medium text-red-100 transition hover:bg-red-500/15';
+    return 'inline-flex items-center justify-center rounded-xl border border-red-500/35 bg-[linear-gradient(180deg,rgba(254,242,242,0.98),rgba(254,226,226,0.94))] px-3 py-2.5 text-sm font-medium text-red-700 shadow-[0_5px_0_rgba(248,113,113,0.5),0_14px_24px_-18px_rgba(127,29,29,0.3)] transition hover:-translate-y-0.5 hover:bg-[linear-gradient(180deg,rgba(254,242,242,1),rgba(254,202,202,0.96))] hover:shadow-[0_7px_0_rgba(248,113,113,0.55),0_18px_28px_-18px_rgba(127,29,29,0.34)] active:translate-y-[3px] active:shadow-[0_2px_0_rgba(248,113,113,0.5)]';
   }
 
   if (variant === 'warning') {
-    return 'inline-flex items-center justify-center rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm font-medium text-amber-100 transition hover:bg-amber-500/15';
+    return 'inline-flex items-center justify-center rounded-xl border border-amber-400/40 bg-[linear-gradient(180deg,rgba(255,251,235,0.98),rgba(254,243,199,0.96))] px-3 py-2.5 text-sm font-medium text-amber-800 shadow-[0_5px_0_rgba(251,191,36,0.45),0_14px_24px_-18px_rgba(120,53,15,0.28)] transition hover:-translate-y-0.5 hover:bg-[linear-gradient(180deg,rgba(255,251,235,1),rgba(253,230,138,0.96))] hover:shadow-[0_7px_0_rgba(251,191,36,0.5),0_18px_28px_-18px_rgba(120,53,15,0.32)] active:translate-y-[3px] active:shadow-[0_2px_0_rgba(251,191,36,0.45)]';
   }
 
-  return 'inline-flex items-center justify-center rounded-xl bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-95';
+  return 'btn-primary rounded-xl px-4 py-2.5';
 }
 
 export function crudInputClassName() {
